@@ -114,7 +114,7 @@ class MainNC: NavigationController, IssueVCdelegate, UIStyleChangeDelegate,
     }
   }
   
-  func produceErrorReport(recipient: String, subject: String = "Feedback", 
+  func produceErrorReport(recipient: String, subject: String = "Feedback",
                           completion: (()->())? = nil) {
     if MFMailComposeViewController.canSendMail() {
       let mail =  MFMailComposeViewController()
@@ -145,6 +145,23 @@ class MainNC: NavigationController, IssueVCdelegate, UIStyleChangeDelegate,
     }
   }
   
+  func sendErrorReport(subject: String = "Feedback",
+                          completion: (()->())? = nil) {
+    let data = DefaultAuthenticator.getUserData()
+      var tazIdText = ""
+    if let tazID = data.id, tazID.isEmpty == false {
+      tazIdText = " taz-ID: \(tazID)"
+    }
+    let preparedMessage = "Blabla id: \(tazIdText)"
+    FeedbackComposer.send(subject: subject,
+                          bodyText: preparedMessage,
+                          screenshot: UIWindow.screenshot,
+                          logData: fileLogger.data) { didSend in
+      print("Feedback send? \(didSend)")
+                            completion?()
+    }
+  }
+  
   func mailComposeController(_ controller: MFMailComposeViewController,
     didFinishWith result: MFMailComposeResult, error: Error?) {
     controller.dismiss(animated: true)
@@ -158,6 +175,11 @@ class MainNC: NavigationController, IssueVCdelegate, UIStyleChangeDelegate,
     guard let recog = sender as? UILongPressGestureRecognizer,
       MFMailComposeViewController.canSendMail()
       else {
+        self.sendErrorReport(subject: "bla") {
+              self.isErrorReporting = false
+        }
+     
+        return;
         Alert.message(title: Localized("no_mail_title"), message: Localized("no_mail_text"), closure: {
           self.isErrorReporting = false
         })
