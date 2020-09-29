@@ -28,7 +28,7 @@ public class LoginView : FormView{
   var loginButton = Padded.Button(title: Localized("login_button"))
   
   var registerButton = Padded.Button(type: .outline,
-                                title: Localized("register_button"))
+                                title: Localized("register_free_button"))
   
   var passForgottButton = Padded.Button(type: .label,
                                    title: Localized("login_forgot_password"))
@@ -42,6 +42,7 @@ public class LoginView : FormView{
         idInput,
         passInput,
         loginButton,
+        Padded.Label(title: Localized("trial_subscription_title")),
         registerButton,
         passForgottButton,
         loginTipsButton

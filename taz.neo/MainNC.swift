@@ -114,7 +114,7 @@ class MainNC: NavigationController, IssueVCdelegate, UIStyleChangeDelegate,
     }
   }
   
-  func produceErrorReport(recipient: String, subject: String = "Feedback",
+  func produceErrorReport(recipient: String, subject: String = "Feedback", 
                           completion: (()->())? = nil) {
     if MFMailComposeViewController.canSendMail() {
       let mail =  MFMailComposeViewController()
@@ -141,27 +141,7 @@ class MainNC: NavigationController, IssueVCdelegate, UIStyleChangeDelegate,
         mail.addAttachmentData(logData, mimeType: "text/plain",
                                fileName: "taz.neo-logfile.txt")
       }
-      
-      mail.modalPresentationStyle = .overCurrentContext
-      mail.modalTransitionStyle = .coverVertical
       self.topmostModalVc.present(mail, animated: true, completion: completion)
-    }
-  }
-  
-  func sendErrorReport(subject: String = "Feedback",
-                          completion: (()->())? = nil) {
-    let data = DefaultAuthenticator.getUserData()
-      var tazIdText = ""
-    if let tazID = data.id, tazID.isEmpty == false {
-      tazIdText = " taz-ID: \(tazID)"
-    }
-    let preparedMessage = "Meine taz-Id: \(tazIdText)\n\nHallo,\n[Ihre Nachricht!, Fehlerbeschreibung, Kritik, Lob]\n\nViele Grüße"
-    FeedbackComposer.send(subject: subject,
-                          bodyText: preparedMessage,
-                          screenshot: UIWindow.screenshot,
-                          logData: fileLogger.data) { didSend in
-      print("Feedback send? \(didSend)")
-                            completion?()
     }
   }
   
@@ -178,11 +158,11 @@ class MainNC: NavigationController, IssueVCdelegate, UIStyleChangeDelegate,
     guard let recog = sender as? UILongPressGestureRecognizer,
       MFMailComposeViewController.canSendMail()
       else {
-        self.sendErrorReport(subject: "Rückmeldung") {
+        self.sendFeedbackComposerErrorReport(subject: "Rückmeldung") {
               self.isErrorReporting = false
         }
-
         return;
+
         Alert.message(title: Localized("no_mail_title"), message: Localized("no_mail_text"), closure: {
           self.isErrorReporting = false
         })
@@ -199,6 +179,24 @@ class MainNC: NavigationController, IssueVCdelegate, UIStyleChangeDelegate,
       else { self.isErrorReporting = false }
     }
   }
+  
+  func sendFeedbackComposerErrorReport(subject: String = "Feedback",
+                          completion: (()->())? = nil) {
+    let data = DefaultAuthenticator.getUserData()
+      var tazIdText = ""
+    if let tazID = data.id, tazID.isEmpty == false {
+      tazIdText = " taz-ID: \(tazID)"
+    }
+    let preparedMessage = "Meine taz-Id: \(tazIdText)\n\nHallo,\n[Ihre Nachricht!, Fehlerbeschreibung, Kritik, Lob]\n\nViele Grüße"
+    FeedbackComposer.send(subject: subject,
+                          bodyText: preparedMessage,
+                          screenshot: UIWindow.screenshot,
+                          logData: fileLogger.data) { didSend in
+      print("Feedback send? \(didSend)")
+                            completion?()
+    }
+  }
+
   
   func reportFatalError(err: Log.Message) {
     guard !isErrorReporting else { return }
@@ -242,17 +240,22 @@ class MainNC: NavigationController, IssueVCdelegate, UIStyleChangeDelegate,
       actions: actions)
   }
   
-  func setupTopMenus(view:UIView? = nil) {
+  func setupTopMenus() {
     let reportLPress2 = UILongPressGestureRecognizer(target: self,
         action: #selector(errorReportActivated))
     let reportLPress3 = UILongPressGestureRecognizer(target: self,
         action: #selector(threeFingerTouch))
     reportLPress2.numberOfTouchesRequired = 2
     reportLPress3.numberOfTouchesRequired = 3
+    
     if let targetView = UIApplication.shared.keyWindow {
       targetView.isUserInteractionEnabled = true
       targetView.addGestureRecognizer(reportLPress2)
       targetView.addGestureRecognizer(reportLPress3)
+    } else {
+      self.view.isUserInteractionEnabled = true
+      self.view.addGestureRecognizer(reportLPress2)
+      self.view.addGestureRecognizer(reportLPress3)
     }
   }
     
@@ -518,6 +521,7 @@ class MainNC: NavigationController, IssueVCdelegate, UIStyleChangeDelegate,
     dfl["isTextNotification"] = "true"
     dfl["nStarted"] = "0"
     dfl["lastStarted"] = "0"
+    dfl["installationId"] = nil
     endPolling()
   }
   
@@ -547,15 +551,16 @@ class MainNC: NavigationController, IssueVCdelegate, UIStyleChangeDelegate,
     startup()
     registerForStyleUpdates()
   }
-  func applyStyles() {
-      self.view.backgroundColor = Const.SetColor.HBackground.color
-    setNeedsStatusBarAppearanceUpdate()
-
-  }
   
   override func viewDidAppear(_ animated: Bool) {
     super.viewDidAppear(animated)
     setupTopMenus()
+  }
+  
+  func applyStyles() {
+      self.view.backgroundColor = Const.SetColor.HBackground.color
+    setNeedsStatusBarAppearanceUpdate()
+
   }
   
   override var preferredStatusBarStyle: UIStatusBarStyle {
