@@ -211,6 +211,22 @@ class FormsResultController: UIViewController {
   }
 }
 
+extension UIViewController {
+  var topmostModalVc : UIViewController {
+    get {
+      var topmostModalVc : UIViewController = self
+      while true {
+        if let modal = topmostModalVc.presentedViewController {
+          topmostModalVc = modal
+        }
+        else{
+          return topmostModalVc
+        }
+      }
+    }
+  }
+}
+
 // MARK: - Modal Present extension for FormsResultController
 extension FormsResultController{
   /// Present given VC on topmost Viewcontroller with flip transition
@@ -218,16 +234,8 @@ extension FormsResultController{
     controller.modalPresentationStyle = .overCurrentContext
     controller.modalTransitionStyle = .flipHorizontal
     
-    var topmostModalVc : UIViewController = self
-    while true {
-      if let modal = topmostModalVc.presentedViewController {
-        topmostModalVc = modal
-      }
-      else{
-        topmostModalVc.present(controller, animated: true, completion:nil)
-        break
-      }
-    }
+//    MainNC.singleton.setupTopMenus(view: controller.view)
+    self.topmostModalVc.present(controller, animated: true, completion:nil)
   }
   
   func modalFromBottom(_ controller:UIViewController){

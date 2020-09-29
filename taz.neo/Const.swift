@@ -243,6 +243,7 @@ public struct Const {
   
   /// Various font values
   struct Fonts {
+    static var defaultFontSize = CGFloat(16)
     
     static var contentFontName: String? = UIFont.register(name: "Aktiv Grotesk")
     static var titleFontName: String? = UIFont.register(name: "Aktiv Grotesk Bold")

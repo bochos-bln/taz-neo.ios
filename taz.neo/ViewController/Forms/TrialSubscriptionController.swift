@@ -220,4 +220,8 @@ class TrialSubscriptionRequestNameCtrl : TrialSubscriptionController{
     
     self.createTrialSubscription(tazId: self.tazId, tazIdPassword: self.tazIdPassword, lastName: inputLastname, firstName: inputFirstname)
   }
+  
+  deinit {
+    print("TSCtrl deinited... :-)")
+  }
 }

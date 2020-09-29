@@ -141,7 +141,10 @@ class MainNC: NavigationController, IssueVCdelegate, UIStyleChangeDelegate,
         mail.addAttachmentData(logData, mimeType: "text/plain",
                                fileName: "taz.neo-logfile.txt")
       }
-      present(mail, animated: true, completion: completion)
+      
+      mail.modalPresentationStyle = .overCurrentContext
+      mail.modalTransitionStyle = .coverVertical
+      self.topmostModalVc.present(mail, animated: true, completion: completion)
     }
   }
   
@@ -152,7 +155,7 @@ class MainNC: NavigationController, IssueVCdelegate, UIStyleChangeDelegate,
     if let tazID = data.id, tazID.isEmpty == false {
       tazIdText = " taz-ID: \(tazID)"
     }
-    let preparedMessage = "Blabla id: \(tazIdText)"
+    let preparedMessage = "Meine taz-Id: \(tazIdText)\n\nHallo,\n[Ihre Nachricht!, Fehlerbeschreibung, Kritik, Lob]\n\nViele Grüße"
     FeedbackComposer.send(subject: subject,
                           bodyText: preparedMessage,
                           screenshot: UIWindow.screenshot,
@@ -175,10 +178,10 @@ class MainNC: NavigationController, IssueVCdelegate, UIStyleChangeDelegate,
     guard let recog = sender as? UILongPressGestureRecognizer,
       MFMailComposeViewController.canSendMail()
       else {
-        self.sendErrorReport(subject: "bla") {
+        self.sendErrorReport(subject: "Rückmeldung") {
               self.isErrorReporting = false
         }
-     
+
         return;
         Alert.message(title: Localized("no_mail_title"), message: Localized("no_mail_text"), closure: {
           self.isErrorReporting = false
@@ -239,16 +242,18 @@ class MainNC: NavigationController, IssueVCdelegate, UIStyleChangeDelegate,
       actions: actions)
   }
   
-  func setupTopMenus() {
+  func setupTopMenus(view:UIView? = nil) {
     let reportLPress2 = UILongPressGestureRecognizer(target: self,
         action: #selector(errorReportActivated))
     let reportLPress3 = UILongPressGestureRecognizer(target: self,
         action: #selector(threeFingerTouch))
     reportLPress2.numberOfTouchesRequired = 2
     reportLPress3.numberOfTouchesRequired = 3
-    self.view.isUserInteractionEnabled = true
-    self.view.addGestureRecognizer(reportLPress2)
-    self.view.addGestureRecognizer(reportLPress3)
+    if let targetView = UIApplication.shared.keyWindow {
+      targetView.isUserInteractionEnabled = true
+      targetView.addGestureRecognizer(reportLPress2)
+      targetView.addGestureRecognizer(reportLPress3)
+    }
   }
     
   func handleFeederError(_ err: FeederError) {
@@ -533,7 +538,6 @@ class MainNC: NavigationController, IssueVCdelegate, UIStyleChangeDelegate,
       return true
     }
     // isEdgeDetection = true
-    setupTopMenus()
     let nc = NotificationCenter.default
     nc.addObserver(self, selector: #selector(goingBackground),
       name: UIApplication.willResignActiveNotification, object: nil)
@@ -547,6 +551,11 @@ class MainNC: NavigationController, IssueVCdelegate, UIStyleChangeDelegate,
       self.view.backgroundColor = Const.SetColor.HBackground.color
     setNeedsStatusBarAppearanceUpdate()
 
+  }
+  
+  override func viewDidAppear(_ animated: Bool) {
+    super.viewDidAppear(animated)
+    setupTopMenus()
   }
   
   override var preferredStatusBarStyle: UIStatusBarStyle {

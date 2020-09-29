@@ -232,6 +232,9 @@ public class DefaultAuthenticator: Authenticator {
     }
 
     firstPresentedAuthController = registerController
+//    if let mainNc = rootVC as? MainNC {
+//      mainNc.setupTopMenus(view: registerController.view)
+//    }
     rootVC.present(registerController, animated: true, completion: nil)
   }
 }
