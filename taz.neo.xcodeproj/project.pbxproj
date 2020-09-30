@@ -10,6 +10,7 @@
 		0015B73724DD86B30037A8D6 /* Authenticator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0015B73524DD86B30037A8D6 /* Authenticator.swift */; };
 		0015B73824DD86B30037A8D6 /* SimpleAuthenticator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0015B73624DD86B30037A8D6 /* SimpleAuthenticator.swift */; };
 		0015B73A24DD87DA0037A8D6 /* DefaultAuthenticator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0015B73924DD87DA0037A8D6 /* DefaultAuthenticator.swift */; };
+		001AA6C02524CF9F00EE1C23 /* TazFeedbackComposer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 001AA6BF2524CF9F00EE1C23 /* TazFeedbackComposer.swift */; };
 		0032A4D924C89E4800284723 /* FormsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0032A4D824C89E4800284723 /* FormsController.swift */; };
 		0032A4DB24C89F1100284723 /* PwForgotController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0032A4DA24C89F1100284723 /* PwForgotController.swift */; };
 		004D4EFE24ACDBA7008C4EE7 /* LoginController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 004D4EFD24ACDBA7008C4EE7 /* LoginController.swift */; };
@@ -88,6 +89,7 @@
 		0015B73524DD86B30037A8D6 /* Authenticator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Authenticator.swift; sourceTree = "<group>"; };
 		0015B73624DD86B30037A8D6 /* SimpleAuthenticator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SimpleAuthenticator.swift; sourceTree = "<group>"; };
 		0015B73924DD87DA0037A8D6 /* DefaultAuthenticator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultAuthenticator.swift; sourceTree = "<group>"; };
+		001AA6BF2524CF9F00EE1C23 /* TazFeedbackComposer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TazFeedbackComposer.swift; sourceTree = "<group>"; };
 		0032A4D824C89E4800284723 /* FormsController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormsController.swift; sourceTree = "<group>"; };
 		0032A4DA24C89F1100284723 /* PwForgotController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PwForgotController.swift; sourceTree = "<group>"; };
 		004D4EFD24ACDBA7008C4EE7 /* LoginController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginController.swift; sourceTree = "<group>"; };
@@ -321,6 +323,7 @@
 				AE5D9EC823E307460002C3B8 /* TestController */,
 				AEBAF587219ACEC700566205 /* Supporting Files */,
 				C794F23424FED184007168AC /* Helper.swift */,
+				001AA6BF2524CF9F00EE1C23 /* TazFeedbackComposer.swift */,
 			);
 			path = taz.neo;
 			sourceTree = "<group>";
@@ -492,6 +495,7 @@
 				AEBAF596219ACFAC00566205 /* AppDelegate.swift in Sources */,
 				00E3D2A524E68F3300AE075A /* TrialSubscriptionView.swift in Sources */,
 				AE44F8E424815AF4009DA152 /* ContentImageVC.swift in Sources */,
+				001AA6C02524CF9F00EE1C23 /* TazFeedbackComposer.swift in Sources */,
 				AEF2DF3324475A6200D1482D /* CarouselController.swift in Sources */,
 				AE5D9EC523E2CD5F0002C3B8 /* DLController.swift in Sources */,
 				006E17E924D418090092DC0D /* FormComponents.swift in Sources */,

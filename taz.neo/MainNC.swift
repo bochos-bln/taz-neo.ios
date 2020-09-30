@@ -188,7 +188,7 @@ class MainNC: NavigationController, IssueVCdelegate, UIStyleChangeDelegate,
       tazIdText = " taz-ID: \(tazID)"
     }
     let preparedMessage = "Meine taz-Id: \(tazIdText)\n\nHallo,\n[Ihre Nachricht!, Fehlerbeschreibung, Kritik, Lob]\n\nViele Grüße"
-    FeedbackComposer.send(subject: subject,
+    TazFeedbackComposer.tazShared.send(subject: subject,
                           bodyText: preparedMessage,
                           screenshot: UIWindow.screenshot,
                           logData: fileLogger.data) { didSend in
