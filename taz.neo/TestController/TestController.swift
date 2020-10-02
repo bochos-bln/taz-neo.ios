@@ -39,9 +39,25 @@ class TestController: PageCollectionVC {
   
   override public var preferredStatusBarStyle: UIStatusBarStyle { .default }
   
+  /// Define the menu to display on long touch of a MomentView
+  public var menu: [(title: String, icon: String, closure: (String)->())] = []
+  
+  /// Add an additional menu item
+  public func addMenuItem(title: String, icon: String, closure: @escaping (String)->()) {
+    menu += (title: title, icon: icon, closure: closure)
+  }
+   
+  
   
   override func viewDidLoad() {
     super.viewDidLoad()
+    addMenuItem(title: "View", icon: "eye") { (_) in
+    //      self.feedbackView.screenshotAttachmentButton.image = nil
+        }
+     var mainmenu = ContextMenu(view: logView)
+        mainmenu.menu = menu
+
+    
     Log.minLogLevel = .Debug
     Log.append(logger: consoleLogger, viewLogger)
     let nd = NotifiedDelegate.singleton!

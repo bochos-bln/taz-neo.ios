@@ -155,6 +155,11 @@ class MainNC: NavigationController, IssueVCdelegate, UIStyleChangeDelegate,
     if isErrorReporting == true { return }//Prevent multiple Calls
     isErrorReporting = true
     
+    self.sendFeedbackComposerErrorReport(subject: "Rückmeldung") {
+           self.isErrorReporting = false
+     }
+    return
+    
     guard let recog = sender as? UILongPressGestureRecognizer,
       MFMailComposeViewController.canSendMail()
       else {
@@ -188,12 +193,19 @@ class MainNC: NavigationController, IssueVCdelegate, UIStyleChangeDelegate,
       tazIdText = " taz-ID: \(tazID)"
     }
     let preparedMessage = "Meine taz-Id: \(tazIdText)\n\nHallo,\n[Ihre Nachricht!, Fehlerbeschreibung, Kritik, Lob]\n\nViele Grüße"
+    
+
+    
+
     TazFeedbackComposer.tazShared.send(subject: subject,
                           bodyText: preparedMessage,
                           screenshot: UIWindow.screenshot,
-                          logData: fileLogger.data) { didSend in
+                          logData: fileLogger.data,
+                          gqlFeeder: self._gqlFeeder
+                          ) { didSend in
       print("Feedback send? \(didSend)")
                             completion?()
+                            
     }
   }
 
