@@ -818,7 +818,7 @@ open class GqlFeeder: Feeder, DoesLog {
 //                          lastAction:String?,//TBD to defiene
 //                          conditions:String?,//TBD
                           errorProtocol:String?,
-//                          eMail:String?,//comes from Server
+                          eMail:String?,//comes from Server
 //                          deviceVersion:String?,
                           screenshotName:String?,
                           screenshot:String?,
@@ -829,7 +829,7 @@ open class GqlFeeder: Feeder, DoesLog {
     }
     
     var ramUsed : String? = nil
-    let ramAvailable : String? = "\(ProcessInfo.processInfo.physicalMemory/(1024 * 1024)) MB"
+    let ramAvailable : String? = "\(ProcessInfo.processInfo.physicalMemory/(1024 * 1024))MB"
     var storageAvailable : String? = nil
     
     let fileURL = URL(fileURLWithPath: NSHomeDirectory() as String)
@@ -838,7 +838,7 @@ open class GqlFeeder: Feeder, DoesLog {
 //      values.file      attributes ofFileSystemforPath => Dict nsfilesystemsize & free size filesystemsize in bytes
       
       if let capacity = values.volumeAvailableCapacityForImportantUsage {
-        storageAvailable = "\(capacity/(1024 * 1024 * 1024)) GB"
+        storageAvailable = "\(capacity/(1024 * 1024 * 1024))GB"
       }
     } catch {
       print("Error retrieving capacity: \(error.localizedDescription)")
@@ -852,7 +852,7 @@ open class GqlFeeder: Feeder, DoesLog {
         }
     }
     if kerr == KERN_SUCCESS {
-      ramUsed = "\(taskInfo.resident_size/(1024 * 1024)) MB"
+      ramUsed = "\(taskInfo.resident_size/(1024 * 1024))MB"
     }
     
     var fields:[String:Any] = [:]

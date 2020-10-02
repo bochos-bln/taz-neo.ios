@@ -197,7 +197,7 @@ class MainNC: NavigationController, IssueVCdelegate, UIStyleChangeDelegate,
 
     
 
-    TazFeedbackComposer.tazShared.send(subject: subject,
+    FeedbackComposer.shared.send(subject: subject,
                           bodyText: preparedMessage,
                           screenshot: UIWindow.screenshot,
                           logData: fileLogger.data,

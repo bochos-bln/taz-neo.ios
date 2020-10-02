@@ -265,4 +265,14 @@ public struct Const {
     
   } // Fonts
   
+  struct Size {
+    static let TextViewPadding = CGFloat(10.0)
+    static let MiniPageNumberFontSize = CGFloat(12)
+    static let DefaultFontSize = CGFloat(16)
+    static let LargeTitleFontSize = CGFloat(34)
+    static let DottedLineHeight = CGFloat(2.4)
+    static let DefaultPadding = CGFloat(15.0)
+    static let TextFieldPadding = CGFloat(10.0)
+  }
+  
 } // Const
