@@ -20,13 +20,17 @@ import NorthLib
  - DONE send feedback
  - DONE move to taz.neo to reduce complexity
  - DONE Feedback Type error/feedback
- - show serverdata enable mail field...
  - DONE refactor kill memory leaks =>   Overlay&ZoomedImageView ... Optimize, take care of Memory Leaks
  - Check if still working in Article & more!!
       - Overlay, seams to work testet in Simulator in ArticleCV && deinit for Overlay Called
             - not for ZoomedImageView? =>  its ContentImageVC => also not => Ticket created #12863
       - ZoomedImageView
- - handle close by pull down
+ - DONE handle close by pull down
+ - DONE fix status bar hidden
+ - WORKAROUND DONE fix screenshot fullscreen border, not using overlay, not using zoomed ImageView
+ - handle difference between feedback and error report
+ - evaluate values for free ram & more on open not send
+ - show serverdata enable mail field...
  */
 
 public enum FeedbackType { case error, feedback }
