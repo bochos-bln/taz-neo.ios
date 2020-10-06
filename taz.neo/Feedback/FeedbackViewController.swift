@@ -143,8 +143,8 @@ public class FeedbackViewController : UIViewController{
     }
   }
   
-  
-  func showScreenshot(){
+  //overlay+zoomed image view => wrong target has unwanted paddings
+  func showScreenshotZiV(){
     print("Open detail View")
     let oi = OptionalImageItem()
     oi.image = screenshot
@@ -158,7 +158,7 @@ public class FeedbackViewController : UIViewController{
     vc.view.setNeedsLayout()
     vc.view.layoutIfNeeded()
     overlay.overlaySize = self.view.frame.size
-    
+    self.view.addBorder(.magenta)
     let openToRect = self.view.frame
     
     
@@ -172,8 +172,54 @@ public class FeedbackViewController : UIViewController{
                          toFrame: openToRect)
   }
   
+  ///zoomed image in Modal VC => no Good due some edge cases let the image stay - uggly handling
+  func showScreenshotSimple(){
+    let vc = UIViewController()
+    let oi = OptionalImageItem()
+    oi.image = screenshot
+    let ziv = ZoomedImageView(optionalImage:oi)
+    
+    vc.view.addSubview(ziv)
+    pin(ziv, to: vc.view)
+    self.present(vc, animated: true) {
+    }
+  }
+  
+  ///imageView in Modal VC the simple solution pan down to close like log => add close x!
+  func showScreenshot(){
+    let vc = OverlayViewController()
+    let imageView = UIImageView(image: screenshot)
+    vc.view.addSubview(imageView)
+    vc.view.backgroundColor = .black//hide the transparent Background from App's Screenshot
+    pin(imageView, to: vc.view)
+    vc.activateCloseX()
+    self.present(vc, animated: true) {
+    }
+  }
+  
+  ///try to combine log presentation style (modal) with overlay and zoomable Image
+  func showScreenshotHasSomeUIIssues(){
+    let avc = UIViewController()
+    let oi = OptionalImageItem()
+    oi.image = screenshot
+    let ziv = ZoomedImageView(optionalImage:oi)
+    let vc = OverlayViewController()
+    
+    vc.view.addSubview(ziv)
+    pin(ziv, to: vc.view)
+    let overlay = Overlay(overlay: vc, into: avc)
+    vc.view.frame = self.view.frame
+    vc.view.setNeedsLayout()
+    vc.view.layoutIfNeeded()
+    overlay.overlaySize = self.view.frame.size
+    self.view.addBorder(.magenta)
+    overlay.open(animated: false, fromBottom: false)
+    self.present(avc, animated: true) {
+    }
+  }
+  
   func showLog(){
-    let logVc = UIViewController()
+    let logVc = OverlayViewController()
     let logView = SimpleLogView()
     
     var logString:String?
@@ -184,6 +230,7 @@ public class FeedbackViewController : UIViewController{
     logView.append(txt: logString ?? "")
     logVc.view.addSubview(logView)
     pin(logView, to: logVc.view)
+    logVc.activateCloseX()
     self.present(logVc, animated: true) {
       print("done!!")
     }
@@ -230,6 +277,36 @@ public class FeedbackViewController : UIViewController{
 }
 
 class OverlayViewController : UIViewController{
+  //REFACTOR!
+  public func activateCloseX(){
+    setupXButton()
+    onX {
+      self.dismiss(animated: true, completion: nil)
+    }
+  }
+  
+  var xButton = Button<CircledXView>()
+  
+  func onX(closure: @escaping ()->()) {
+    xButton.isHidden = false
+    xButton.onPress {_ in closure() }
+  }
+  
+  /// Setup the xButton
+  func setupXButton() {
+    xButton.pinHeight(35)
+    xButton.pinWidth(35)
+    xButton.color = .black
+    xButton.buttonView.isCircle = true
+    xButton.buttonView.circleColor = UIColor.rgb(0xdddddd)
+    xButton.buttonView.color = UIColor.rgb(0x707070)
+    xButton.buttonView.innerCircleFactor = 0.5
+    self.view.addSubview(xButton)
+    pin(xButton.right, to: self.view.rightGuide(), dist: -15)
+    pin(xButton.top, to: self.view.topGuide(), dist: 15)
+    xButton.isHidden = true
+  }
+  
   deinit {
     print("deinit OverlayViewController")
   }
