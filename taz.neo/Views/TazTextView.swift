@@ -93,7 +93,7 @@ public class ViewWithTextView : UIStackView{
   
   
   // MARK: > inputToolbar
-  lazy var inputToolbar: UIToolbar = createToolbar()
+//  lazy var inputToolbar: UIToolbar = createToolbar()
 }
 
 // MARK: - TazTextField : Toolbar
@@ -202,7 +202,7 @@ extension ViewWithTextView{
 extension ViewWithTextView : UITextViewDelegate{
   public func textViewDidBeginEditing(_ textView: UITextView)
   {
-    textView.inputAccessoryView = inputToolbar
+//    textView.inputAccessoryView = inputToolbar
     if (textView.text == placeholder)
     {
       if let constraint = textViewheightConstraint {
@@ -223,6 +223,15 @@ extension ViewWithTextView : UITextViewDelegate{
   }
   
   func verifyPlaceholder(){
+    
+//    print("""
+//      verify placeholder for tazTextView with
+//      \ntopMessage: \(self.topMessage)
+//      \nplaceholder: \(self.placeholder)
+//      \ntext: \(self.text)
+//      \nbottomMessage: \(self.bottomMessage)
+//    """)
+    
     if (self.textView.text == "")
     {
       self.textView.text = placeholder
@@ -233,8 +242,8 @@ extension ViewWithTextView : UITextViewDelegate{
     }
   }
   
-  public func textViewShouldEndEditing(_ textView: UITextView) -> Bool {
-    nextOrEndEdit()
-    return true
-  }
+//  public func textViewShouldEndEditing(_ textView: UITextView) -> Bool {
+//    nextOrEndEdit()
+//    return true
+//  }
 }
