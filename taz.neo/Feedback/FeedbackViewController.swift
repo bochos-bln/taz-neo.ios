@@ -121,15 +121,15 @@ public class FeedbackViewController : UIViewController{
     var screenshotData : String?
     var screenshotName : String?
     
-//    if let sc = screenshot {
-//      screenshotData = sc.pngData()?.base64EncodedString()
-//      screenshotName = "Screenshot_\(Date())"
-//    }
-//
+    //    if let sc = screenshot {
+    //      screenshotData = sc.pngData()?.base64EncodedString()
+    //      screenshotName = "Screenshot_\(Date())"
+    //    }
+    //
     var logString:String?
-//    if let data = logData {
-//      logString = String(data:data , encoding: .utf8)
-//    }
+    //    if let data = logData {
+    //      logString = String(data:data , encoding: .utf8)
+    //    }
     
     
     gqlFeeder?.errorReport(message: message,
@@ -139,28 +139,28 @@ public class FeedbackViewController : UIViewController{
                            eMail: feedbackView?.senderMail.text,
                            screenshotName: screenshotName,
                            screenshot: screenshotData) { (result) in
-      print("Result")
+                            print("Result")
     }
   }
   
-  //TODO: Optimize, take care of Memory Leaks
+  
   func showScreenshot(){
     print("Open detail View")
     let oi = OptionalImageItem()
-    //    oi.image = self.feedbackView.screenshotAttachmentButton.image
+    oi.image = screenshot
     let ziv = ZoomedImageView(optionalImage:oi)
-    let vc = UIViewController()
+    let vc = OverlayViewController()
+    
     vc.view.addSubview(ziv)
     pin(ziv, to: vc.view)
     let overlay = Overlay(overlay: vc, into: self)
-    
     vc.view.frame = self.view.frame
     vc.view.setNeedsLayout()
     vc.view.layoutIfNeeded()
     overlay.overlaySize = self.view.frame.size
+    
     let openToRect = self.view.frame
     
-    ziv.addBorder(.green)
     
     guard let child = self.feedbackView?.screenshotAttachmentButton else {
       //tapped button disapeared - impossible
@@ -170,12 +170,6 @@ public class FeedbackViewController : UIViewController{
     
     overlay.openAnimated(fromFrame: fromFrame,
                          toFrame: openToRect)
-//    overlay.onClose {
-//      overlay = nil
-//      ziv = nil
-//      io = nil
-//      vc = nil
-//    }
   }
   
   func showLog(){
@@ -233,6 +227,12 @@ public class FeedbackViewController : UIViewController{
   public var mainmenu1 : ContextMenu?
   public var mainmenu2 : ContextMenu?
   
+}
+
+class OverlayViewController : UIViewController{
+  deinit {
+    print("deinit OverlayViewController")
+  }
 }
 
 extension FeedbackViewController : UITextViewDelegate {

@@ -21,7 +21,12 @@ import NorthLib
  - DONE move to taz.neo to reduce complexity
  - DONE Feedback Type error/feedback
  - show serverdata enable mail field...
- - refactor kill memory leaks
+ - DONE refactor kill memory leaks =>   Overlay&ZoomedImageView ... Optimize, take care of Memory Leaks
+ - Check if still working in Article & more!!
+      - Overlay, seams to work testet in Simulator in ArticleCV && deinit for Overlay Called
+            - not for ZoomedImageView? =>  its ContentImageVC => also not => Ticket created #12863
+      - ZoomedImageView
+ - handle close by pull down
  */
 
 public enum FeedbackType { case error, feedback }
@@ -60,6 +65,17 @@ open class FeedbackComposer : DoesLog{
                                                   into: currentVc)
     feedbackBottomSheet?.sliderView.backgroundColor = Const.SetColor.CTBackground.color
     feedbackBottomSheet?.coverageRatio = 1.0
+    
+    feedbackBottomSheet?.onUserSlideToClose = ({
+      feedbackBottomSheet?.slide(toOpen: true, animated: true)
+      Alert.confirm(message: Localized("feedback_cancel_title"),
+                    isDestructive: true) { (close) in
+                      if close {
+                        feedbackBottomSheet?.slide(toOpen: false, animated: true)
+                      }
+      }
+    })
+    
     feedbackBottomSheet?.onClose(closure: { (slider) in
       var sendSuccess = false
       if let fb = feedbackBottomSheet {

@@ -75,7 +75,12 @@ public class ContentImageVC: ImageCollectionVC, CanRotate {
       image.image = image.waitingImage 
     }
     return image
-  } 
+  }
+  
+  deinit {
+    //Not called if used in content VC ToDo
+    print("deinit ContentImageVC")
+  }
   
   /// Create a ZoomedImage from an image file name
   private func zoomedImage(fname: String) -> ZoomedImage? {
