@@ -59,7 +59,7 @@ public class FeedbackView : UIView {
   
   private func setup() {
     self.onTapping { [weak self] (_) in
-      self?.resignActiveInput()
+      self?.endEditing(false)
     }
     
     messageTextView.topMessage = "Ihre Nachhricht"
@@ -138,20 +138,3 @@ public class FeedbackView : UIView {
   }
 }
 
-// MARK: resignActiveInput
-extension FeedbackView {
-  func resignActiveInput(){
-    if self.messageTextView.isFirstResponder {
-      self.messageTextView.resignFirstResponder()
-    }
-    else if self.lastInteractionTextView.isFirstResponder {
-      self.lastInteractionTextView.resignFirstResponder()
-    }
-    else if self.environmentTextView.isFirstResponder {
-      self.environmentTextView.resignFirstResponder()
-    }
-    else if self.senderMail.isFirstResponder {
-      self.senderMail.resignFirstResponder()
-    }
-  }
-}
