@@ -10,7 +10,7 @@ import Foundation
 import NorthLib
 
 extension UIView{
-  static func seperator(color:UIColor? = nil, thickness:CGFloat = 0.3) -> UIView{
+  static func seperator(color:UIColor? = nil, thickness:CGFloat = 0.5) -> UIView{
     let v = UIView()
     
     if let c = color {

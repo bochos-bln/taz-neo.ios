@@ -11,78 +11,64 @@ import UIKit
 import NorthLib
 /**
  TODOS
- - Total BG (Anfasser auf Transparent)
- - Text Area BG = BG
- - LOng Touch to remove
- - integrate screenshot
- - integrate log
- - tap to show
- - send feedback
+ - DONE Total BG (Anfasser auf Transparent)
+ - DONE Text Area BG = BG
+ - DONE LOng Touch to remove
+ - DONE integrate screenshot
+ - DONE integrate log
+ - DONE tap to show
+ - DONE send feedback
+ - DONE move to taz.neo to reduce complexity
+ - DONE Feedback Type error/feedback
+ - show serverdata enable mail field...
+ - refactor kill memory leaks
  */
 
+public enum FeedbackType { case error, feedback }
 
 open class FeedbackComposer : DoesLog{
-  static let shared = FeedbackComposer()
-  public init() {}
-  ///Remember Bottom Sheet due its strong reference to active (VC) it wount be de-inited
-  public private(set) var feedbackBottomSheet : FeedbackBottomSheet?
   
-  
-  let _feedbackViewController = FeedbackViewController()
-  open var feedbackViewController : FeedbackViewController {
-    get { return _feedbackViewController }
-  }
-  
-  
-  public func send(subject: String, bodyText: String, screenshot: UIImage? = nil, logData: Data? = nil, gqlFeeder: GqlFeeder, finishClosure: @escaping ((Bool) -> ())) {
-    _feedbackViewController.gqlFeeder = gqlFeeder
-    
-    
-    
+  public static func send(type: FeedbackType,
+                   subject: String,
+                   bodyText: String,
+                   screenshot: UIImage? = nil,
+                   logData: Data? = nil,
+                   gqlFeeder: GqlFeeder,
+                   finishClosure: @escaping ((Bool) -> ())) {
     
     guard let currentVc = UIViewController.top() else {
-      log("Error, no Controller to Present")
+      print("Error, no Controller to Present")
       return;
     }
     
-    //ToDo may do nothing if still presented!?
-    if feedbackBottomSheet == nil {
-      feedbackBottomSheet = FeedbackBottomSheet(slider: feedbackViewController,
-                                                into: currentVc)
-      
-    }
-    else {
-      feedbackBottomSheet?.activeVC = currentVc
-    }
+    var feedbackBottomSheet : FeedbackBottomSheet?
     
+    let feedbackViewController = FeedbackViewController(type: type,
+                                                        subject: subject,
+                                                        bodyText: bodyText,
+                                                        screenshot: screenshot,
+                                                        logData: logData,
+                                                        gqlFeeder: gqlFeeder,
+                                                        finishClosure: {
+                                                          (send) in
+                                                          feedbackBottomSheet?.sendSuccees = send
+                                                          feedbackBottomSheet?.close()
+                                                          finishClosure(send)
+    })
     
+    feedbackBottomSheet = FeedbackBottomSheet(slider: feedbackViewController,
+                                                  into: currentVc)
     feedbackBottomSheet?.sliderView.backgroundColor = Const.SetColor.CTBackground.color
-    
-    if let feedbackCtrl = feedbackBottomSheet?.sliderVC as? FeedbackViewController {
-      feedbackCtrl.feedbackView.messageTextView.text = bodyText
-      feedbackCtrl.screenshot = screenshot
-      if let data = logData {
-        feedbackCtrl.logString = String(data:data , encoding: .utf8)
+    feedbackBottomSheet?.coverageRatio = 1.0
+    feedbackBottomSheet?.onClose(closure: { (slider) in
+      var sendSuccess = false
+      if let fb = feedbackBottomSheet {
+        sendSuccess = fb.sendSuccees
       }
-      
-      feedbackCtrl.subject = subject
-      feedbackCtrl.feedbackView.sendButton.addTarget(self, action: #selector(handleSend), for: .touchUpInside)
-    }
-    
-    guard let feedbackBottomSheet = feedbackBottomSheet else { return }
-    
-    feedbackBottomSheet.onClose { (slida) in
-      finishClosure(true)
-      self.feedbackBottomSheet = nil
-    }
-    self.feedbackBottomSheet?.coverageRatio = 1.0
-    self.feedbackBottomSheet?.open()
-  }
-  
-  @objc open func handleSend(){
-    if let feedbackCtrl = feedbackBottomSheet?.sliderVC as? FeedbackViewController {
-      feedbackCtrl.handleSend()
-    }
+      finishClosure(sendSuccess)
+      feedbackBottomSheet = nil//Important the memory leak!
+    })
+    feedbackBottomSheet?.open()
   }
 }
 

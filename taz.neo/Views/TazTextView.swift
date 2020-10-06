@@ -10,113 +10,92 @@ import Foundation
 import UIKit
 import NorthLib
 
-// MARK: - TazTextView
-class TazTextView : Padded.TextView {
-  static let recomendedHeight:CGFloat = 56.0
-  private let border = BorderView()
+// MARK: - TazTextView : UITextView
+
+
+/// A UITextView with Top Label (for Description), Bottom Label (for Errormessages), Placeholder Label (Placeholder)
+public class ViewWithTextView : UIStackView{
+  
   let topLabel = UILabel()
   let bottomLabel = UILabel()
-  private var borderHeightConstraint: NSLayoutConstraint?
+  let textView = UITextView()
   
-  
-  // MARK: > pwInput
-  required convenience init(prefilledText: String? = nil,
-                color: UIColor = Const.SetColor.CIColor.color,
-                textColor: UIColor = Const.SetColor.CTDate.color,
-                height: CGFloat = TazTextField.recomendedHeight,
-                paddingTop: CGFloat = Const.Size.TextViewPadding,
-                paddingBottom: CGFloat = Const.Size.TextViewPadding,
-                enablesReturnKeyAutomatically: Bool = false,
-                keyboardType: UIKeyboardType = .default,
-                autocapitalizationType: UITextAutocapitalizationType = .words,
-                target: Any? = nil,
-                action: Selector? = nil) {
-    self.init()
-    pinHeight(height)
-    self.paddingTop = paddingTop
-    self.paddingBottom = paddingBottom
-    
-    self.textColor = textColor
-    self.keyboardType = keyboardType
-    self.textContentType = textContentType
-    self.autocapitalizationType = autocapitalizationType
-    self.enablesReturnKeyAutomatically = enablesReturnKeyAutomatically
-    self.isSecureTextEntry = isSecureTextEntry
-    setup()
-  }
-  
-  
-  // MARK: > init
-//  public override init(frame: CGRect){
-//    super.init(frame: frame)
-//    setup()
-//  }
-  
-  required public init?(coder: NSCoder) {
-    super.init(coder: coder)
-    setup()
-  }
-  
-  func setup(){
-    self.addSubview(border)
-    self.delegate = self
-    self.border.backgroundColor = Const.SetColor.ForegroundHeavy.color
-    self.borderHeightConstraint = border.pinHeight(1)
-    pin(border.left, to: self.left)
-    pin(border.right, to: self.right)
-    pin(border.bottom, to: self.bottom, dist: -15)
-//    self.addTarget(self, action: #selector(textFieldEditingDidChange),
-//                   for: UIControl.Event.editingChanged)
-//    self.addTarget(self, action: #selector(textFieldEditingDidBegin),
-//                   for: UIControl.Event.editingDidBegin)
-//    self.addTarget(self, action: #selector(textFieldEditingDidEnd),
-//                   for: UIControl.Event.editingDidEnd)
-  }
-  
-  override open var text: String?{
-    didSet{
-      if let _text = text, _text.isEmpty {
-        UIView.animate(seconds: 0.3) { [weak self] in
-          self?.topLabel.alpha = 0.0
-        }
-      }
-      else {
-        UIView.animate(seconds: 0.3) { [weak self] in
-          self?.topLabel.alpha = 1.0
-        }
-      }
-    }
-  }
-  
- 
+  weak open var delegate: UITextViewDelegate?
   
   // MARK: > bottomMessage
-  open var bottomMessage: String?{
+  var bottomMessage: String?{
     didSet{
       bottomLabel.text = bottomMessage
-      if bottomLabel.superview == nil && bottomMessage?.isEmpty == false{
-        bottomLabel.alpha = 0.0
-        bottomLabel.numberOfLines = 1
-        self.addSubview(bottomLabel)
-        pin(bottomLabel.left, to: self.left)
-        pin(bottomLabel.right, to: self.right)
-        pin(bottomLabel.bottom, to: self.bottom)
-        bottomLabel.font = Const.Fonts.contentFont(size: Const.Size.MiniPageNumberFontSize)
-        bottomLabel.textColor = Const.SetColor.CIColor.color
-      }
-      
       UIView.animate(seconds: 0.3) { [weak self] in
         self?.bottomLabel.alpha = self?.bottomMessage?.isEmpty == false ? 1.0 : 0.0
       }
     }
   }
   
+  var text: String?{
+    get { return self.textView.text}
+    set {
+      self.textView.text = newValue
+      verifyPlaceholder()
+    }
+  }
+  
+  var placeholder : String? {
+    didSet { verifyPlaceholder() }
+  }
+  
+  var topMessage: String?{
+    didSet{
+      topLabel.text = topMessage
+      UIView.animate(seconds: 0.3) { [weak self] in
+        self?.topLabel.alpha = self?.topMessage?.isEmpty == false ? 1.0 : 0.0
+      }
+    }
+  }
+  
+  required init(text: String? = nil,
+                font: UIFont = Const.Fonts.contentFont(size: Const.Size.DefaultFontSize)) {
+    super.init(frame: .zero)
+    
+    self.axis = .vertical
+    
+    textView.delegate = self
+    textView.font = font
+    textView.textColor = Const.SetColor.CTDate.color
+    
+    topLabel.numberOfLines = 1
+    topLabel.alpha = 0.0
+    topLabel.font = Const.Fonts.contentFont(size: Const.Size.MiniPageNumberFontSize)
+    self.topLabel.textColor = Const.SetColor.ForegroundLight.color
+    
+    bottomLabel.alpha = 0.0
+    bottomLabel.numberOfLines = 1
+    bottomLabel.font = Const.Fonts.contentFont(size: Const.Size.MiniPageNumberFontSize)
+    bottomLabel.textColor = Const.SetColor.CIColor.color
+    
+    self.addArrangedSubview(topLabel)
+    self.addArrangedSubview(textView)
+    self.addArrangedSubview(bottomLabel)
+    
+    textView.textContainerInset = UIEdgeInsets.zero
+    textView.textContainer.lineFragmentPadding = 0
+    textView.isScrollEnabled = false
+    textView.text = text
+    
+    self.textViewDidBeginEditing(textView)
+  }
+  
+  required init(coder: NSCoder) {
+    fatalError("init(coder:) has not been implemented")
+  }
+  
+  
   // MARK: > inputToolbar
   lazy var inputToolbar: UIToolbar = createToolbar()
 }
 
 // MARK: - TazTextField : Toolbar
-extension TazTextView{
+extension ViewWithTextView{
   
   fileprivate func createToolbar() -> UIToolbar{
     /// setting toolbar width fixes the h Autolayout issue, unfortunatly not the v one no matter which height
@@ -173,13 +152,21 @@ extension TazTextView{
   }
   
   @objc func textFieldToolbarDoneButtonPressed(sender: UIBarButtonItem) {
-    self.resignFirstResponder()
+    self.textView.resignFirstResponder()
   }
   
   @objc func textFieldToolbarPrevButtonPressed(sender: UIBarButtonItem) {
-    if let nextField = self.superview?.viewWithTag(self.tag - 1) as? UITextField {
+    let nextView = self.superview?.viewWithTag(self.tag - 1)
+    if let nextField = nextView as? UITextField {
       nextField.becomeFirstResponder()
-    } else {
+    }
+    else if let nextView = nextView as? UITextView {
+      nextView.becomeFirstResponder()
+    }
+    else if let nextView = nextView as? ViewWithTextView {
+      nextView.textView.becomeFirstResponder()
+    }
+    else {
       self.resignFirstResponder()
     }
   }
@@ -189,51 +176,58 @@ extension TazTextView{
   }
   
   func nextOrEndEdit(){
-    if let nextField = self.superview?.viewWithTag(self.tag + 1) as? UITextField {
+    let nextView = self.superview?.viewWithTag(self.tag + 1)
+    if let nextField = nextView as? UITextField {
       nextField.becomeFirstResponder()
-    } else {
-      self.resignFirstResponder()
     }
+    else if let nextView = nextView as? UITextView {
+      nextView.becomeFirstResponder()
+    }
+    else if let nextView = nextView as? ViewWithTextView {
+      nextView.textView.becomeFirstResponder()
+    }
+    else {
+      self.textView.resignFirstResponder()
+    }
+  }
+  
+  public override func becomeFirstResponder() -> Bool {
+    self.textView.becomeFirstResponder()
   }
 }
 
-// MARK: - TazTextField : UITextFieldDelegate
-extension TazTextView :  UITextViewDelegate{
-  @objc public func textFieldEditingDidChange(_ textField: UITextField) {
-    if let _text = textField.text, _text.isEmpty {
-      UIView.animate(seconds: 0.3) { [weak self] in
-        self?.topLabel.alpha = 0.0
-      }
+// MARK: - TazTextField : UITextViewDelegate
+extension ViewWithTextView : UITextViewDelegate{
+  public func textViewDidBeginEditing(_ textView: UITextView)
+  {
+    textView.inputAccessoryView = inputToolbar
+    if (textView.text == placeholder)
+    {
+      textView.text = ""
+      textView.textColor = Const.SetColor.CTDate.color
+    }
+  }
+  
+  public func textViewDidEndEditing(_ textView: UITextView)
+  {
+    verifyPlaceholder()
+    textView.resignFirstResponder()
+    delegate?.textViewDidEndEditing?(textView)
+  }
+  
+  func verifyPlaceholder(){
+    if (self.textView.text == "")
+    {
+      self.textView.text = placeholder
+      self.textView.textColor = Const.SetColor.ForegroundLight.color
     }
     else {
-      UIView.animate(seconds: 0.3) { [weak self] in
-        self?.topLabel.alpha = 1.0
-      }
+      textView.textColor = Const.SetColor.CTDate.color
     }
   }
   
-  @objc func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+  public func textViewShouldEndEditing(_ textView: UITextView) -> Bool {
     nextOrEndEdit()
     return true
-  }
-  
-  @objc public func textFieldEditingDidBegin(_ textField: UITextField) {
-    textField.inputAccessoryView = inputToolbar
-    
-    UIView.animate(seconds: 0.3) { [weak self] in
-      self?.border.backgroundColor = Const.SetColor.CIColor.color
-      self?.topLabel.textColor = Const.SetColor.CIColor.color
-      self?.borderHeightConstraint?.constant = 2.0
-    }
-  }
-  
-  @objc public func textFieldEditingDidEnd(_ textField: UITextField) {
-    //textField.text = textField.text?.trim //work not good "123 456" => "123"
-    //push (e.g.) pw forgott child let end too late
-    UIView.animate(seconds: 0.3) { [weak self] in
-      self?.border.backgroundColor = Const.SetColor.ForegroundHeavy.color
-      self?.topLabel.textColor = Const.SetColor.ForegroundHeavy.color
-      self?.borderHeightConstraint?.constant = 1.0
-    }
   }
 }

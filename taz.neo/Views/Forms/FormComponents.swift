@@ -474,8 +474,6 @@ class CustomTextView : Padded.TextView{
     }
   }
   
-
-  
   required init(htmlText: String,
                 paddingTop: CGFloat = TextFieldPadding,
                 paddingBottom: CGFloat = TextFieldPadding,

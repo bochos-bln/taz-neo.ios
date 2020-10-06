@@ -197,7 +197,8 @@ class MainNC: NavigationController, IssueVCdelegate, UIStyleChangeDelegate,
 
     
 
-    FeedbackComposer.shared.send(subject: subject,
+    FeedbackComposer.send(type: FeedbackType.error,
+                          subject: subject,
                           bodyText: preparedMessage,
                           screenshot: UIWindow.screenshot,
                           logData: fileLogger.data,

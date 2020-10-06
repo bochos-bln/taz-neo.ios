@@ -815,11 +815,10 @@ open class GqlFeeder: Feeder, DoesLog {
   
   /// send error report to server
   public func errorReport(message:String?,
-//                          lastAction:String?,//TBD to defiene
-//                          conditions:String?,//TBD
+                          lastAction:String?,
+                          conditions:String?,
                           errorProtocol:String?,
                           eMail:String?,//comes from Server
-//                          deviceVersion:String?,
                           screenshotName:String?,
                           screenshot:String?,
                           finished: @escaping(Result<String,Error>)->()) {
@@ -856,18 +855,16 @@ open class GqlFeeder: Feeder, DoesLog {
     }
     
     var fields:[String:Any] = [:]
-    fields["message"] = "TEST RINGO!!"
-    //    fields["lastAction"] = lastAction
-    //    fields["conditions"] = conditions
+    fields["message"] = message
+        fields["lastAction"] = lastAction
+        fields["conditions"] = "Bitte ignorieren: Ringo entwickelt" //conditions
     fields["deviceOS"] = "iOS \(UIDevice.current.systemVersion)"
-    //    field 
     fields["deviceName"] = UIDevice().model
     //    fields["deviceVersion"] = deviceVersion
     fields["appVersion"] = "\(App.name) (\(App.bundleIdentifier)) Ver.:\(App.bundleVersion) #\(App.buildNumber)"
     fields["installationId"] = App.installationId
     fields["storageAvailable"] = storageAvailable
     //    fields["storageUsed"] = storageUsed
-    //    fields["storageType"] = storageType
     fields["ramAvailable"] = ramAvailable
     fields["ramUsed"] = ramUsed
     fields["pushToken"] = Defaults.singleton["pushToken"]
@@ -882,6 +879,10 @@ open class GqlFeeder: Feeder, DoesLog {
     arrayData += "deviceFormat: \(Device.deviceFormat)"
     arrayData += "errorProtocol: \(errorProtocol?.quote() ?? "-")"
     let request = "errorReport(\(arrayData.joined(separator: ", ")))"
+    
+    print(request)
+    return;
+    
     gqlSession.mutation(graphql: request, type: [String:String].self) { (res) in
       var ret: Result<String,Error>
       switch res {
