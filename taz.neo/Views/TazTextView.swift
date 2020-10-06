@@ -18,6 +18,8 @@ public class ViewWithTextView : UIStackView{
   
   var textViewheightConstraint:NSLayoutConstraint?
   
+  var isFilled:Bool{ get {return text != placeholder}}
+  
   let topLabel = UILabel()
   let bottomLabel = UILabel()
   let textView = UITextView()

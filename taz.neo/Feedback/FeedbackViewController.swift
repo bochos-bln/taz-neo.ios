@@ -33,7 +33,6 @@ public class FeedbackViewController : UIViewController{
   }
   
   var type: FeedbackType?
-  var bodyText: String?
   var screenshot: UIImage? {
     didSet{
       feedbackView?.screenshotAttachmentButton.image = screenshot
@@ -46,13 +45,12 @@ public class FeedbackViewController : UIViewController{
   public var feedbackView : FeedbackView?
   
   init(type: FeedbackType,
-       subject: String,
-       bodyText: String,
        screenshot: UIImage? = nil,
        logData: Data? = nil,
        gqlFeeder: GqlFeeder,
        finishClosure: @escaping ((Bool) -> ())) {
-    self.feedbackView = FeedbackView(type: type, subject:subject, bodyText:bodyText)
+    self.feedbackView = FeedbackView(type: type,
+                                     isLoggedIn: gqlFeeder.authToken != nil )
     self.screenshot = screenshot
     self.type = type
     self.logData = logData
@@ -80,17 +78,6 @@ public class FeedbackViewController : UIViewController{
     //didSet not called in init, so set the button`s image here
     feedbackView.screenshotAttachmentButton.image = screenshot
     
-    if gqlFeeder?.authToken != nil {
-      //User is logged In
-      feedbackView.additionalInfoLabel.text = "additionalInfoLabel.text"
-      feedbackView.senderMail.placeholder = "Antwort Mail"
-    }
-    else {
-      //User is not logged in
-      feedbackView.additionalInfoLabel.text = "additionalInfoLabel.text"
-      feedbackView.senderMail.placeholder = "Antwort Mail"
-    }
-    
     self.view.addSubview(feedbackView)
     pin(feedbackView, to:self.view)
     
@@ -113,7 +100,10 @@ public class FeedbackViewController : UIViewController{
   }
   
   @objc public func handleSend(){
-    guard let message = feedbackView?.messageTextView.text else {
+    //Wollen Sie den Report ohne weitere Angaben senden?
+    guard let feedbackView = feedbackView,
+      feedbackView.messageTextView.isFilled,
+      let message = feedbackView.messageTextView.text else {
       log("Send not possible no message")
       return;
     }
@@ -133,10 +123,10 @@ public class FeedbackViewController : UIViewController{
     
     
     gqlFeeder?.errorReport(message: message,
-                           lastAction: feedbackView?.lastInteractionTextView.text,
-                           conditions: feedbackView?.environmentTextView.text,
+                           lastAction: feedbackView.lastInteractionTextView.text,
+                           conditions: feedbackView.environmentTextView.text,
                            errorProtocol: logString,
-                           eMail: feedbackView?.senderMail.text,
+                           eMail: feedbackView.senderMail.text,
                            screenshotName: screenshotName,
                            screenshot: screenshotData) { (result) in
                             print("Result")
@@ -190,7 +180,7 @@ public class FeedbackViewController : UIViewController{
     let vc = OverlayViewController()
     let imageView = UIImageView(image: screenshot)
     vc.view.addSubview(imageView)
-    vc.view.backgroundColor = .black//hide the transparent Background from App's Screenshot
+    vc.view.backgroundColor = UIColor(white: 0.0, alpha: 0.8)//hide the transparent Background from App's Screenshot
     pin(imageView, to: vc.view)
     vc.activateCloseX()
     self.present(vc, animated: true) {
@@ -239,7 +229,7 @@ public class FeedbackViewController : UIViewController{
   lazy var logAttatchmentMenu : ContextMenu? = {
     guard let target = self.feedbackView?.logAttachmentButton else { return nil }
     let menu = ContextMenu(view: target)
-    menu.addMenuItem(title: "View", icon: "eye") {[weak self]  (_) in
+    menu.addMenuItem(title: "Ansehen", icon: "eye") {[weak self]  (_) in
       self?.showLog()
     }
     menu.addMenuItem(title: "Löschen", icon: "trash.circle") { (_) in
@@ -252,7 +242,7 @@ public class FeedbackViewController : UIViewController{
   lazy var screenshotAttatchmentMenu : ContextMenu? = {
     guard let target = self.feedbackView?.screenshotAttachmentButton else { return nil}
     let menu = ContextMenu(view: target)
-    menu.addMenuItem(title: "View", icon: "eye") { [weak self]  (_) in
+    menu.addMenuItem(title: "Ansehen", icon: "eye") { [weak self]  (_) in
       self?.showScreenshot()
     }
     menu.addMenuItem(title: "Löschen", icon: "trash.circle") { (_) in

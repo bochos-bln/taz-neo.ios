@@ -155,63 +155,31 @@ class MainNC: NavigationController, IssueVCdelegate, UIStyleChangeDelegate,
     if isErrorReporting == true { return }//Prevent multiple Calls
     isErrorReporting = true
     
-    self.sendFeedbackComposerErrorReport(subject: "Rückmeldung") {
-           self.isErrorReporting = false
-     }
-    return
-    
-    guard let recog = sender as? UILongPressGestureRecognizer,
-      MFMailComposeViewController.canSendMail()
-      else {
-        self.sendFeedbackComposerErrorReport(subject: "Rückmeldung") {
-              self.isErrorReporting = false
-        }
-        return;
-
-        Alert.message(title: Localized("no_mail_title"), message: Localized("no_mail_text"), closure: {
-          self.isErrorReporting = false
-        })
-        return
+    FeedbackComposer.requestFeedback( logData: fileLogger.data, gqlFeeder: self._gqlFeeder) { didSend in
+         print("Feedback send? \(didSend)")
+      self.isErrorReporting = false
+       }
+  }
+  
+  func reportFatalError(err: Log.Message) {
+    guard !isErrorReporting else { return }
+    isErrorReporting = true
+    if self.presentedViewController != nil {
+      dismiss(animated: false)
     }
-    Alert.confirm(title: "Rückmeldung",
-      message: "Wollen Sie uns eine Fehlermeldung senden oder haben Sie einen " +
-               "Kommentar zu unserer App?") { yes in
+    Alert.confirm(title: "Interner Fehler",
+                  message: "Es liegt ein schwerwiegender interner Fehler vor, möchten Sie uns " +
+                           "darüber mit einer Nachricht informieren?\n" +
+                           "Interne Fehlermeldung:\n\(err)") { yes in
       if yes {
-        var recipient = "app@taz.de"
-        if recog.numberOfTouchesRequired == 3 { recipient = "ios-entwickler@taz.de" }
-        self.produceErrorReport(recipient: recipient)
+        self.produceErrorReport(recipient: "app@taz.de", subject: "Interner Fehler")
       }
       else { self.isErrorReporting = false }
     }
   }
   
-  func sendFeedbackComposerErrorReport(subject: String = "Feedback",
-                          completion: (()->())? = nil) {
-    let data = DefaultAuthenticator.getUserData()
-      var tazIdText = ""
-    if let tazID = data.id, tazID.isEmpty == false {
-      tazIdText = " taz-ID: \(tazID)"
-    }
-    let preparedMessage = "Meine taz-Id: \(tazIdText)\n\nHallo,\n[Ihre Nachricht!, Fehlerbeschreibung, Kritik, Lob]\n\nViele Grüße"
-    
-
-    
-
-    FeedbackComposer.send(type: FeedbackType.error,
-                          subject: subject,
-                          bodyText: preparedMessage,
-                          screenshot: UIWindow.screenshot,
-                          logData: fileLogger.data,
-                          gqlFeeder: self._gqlFeeder
-                          ) { didSend in
-      print("Feedback send? \(didSend)")
-                            completion?()
-                            
-    }
-  }
-
   
-  func reportFatalError(err: Log.Message) {
+  func reportFatalError1(err: Log.Message) {
     guard !isErrorReporting else { return }
     isErrorReporting = true
     if self.presentedViewController != nil {

@@ -15,7 +15,7 @@ import UIKit
  UI:
  
  subjectLabel   :::: sendButton
- additionalInfoLabel (wenn angemeldet!!)
+ senderMailDescriptionLabel (wenn angemeldet!!)
  senderMailTextField
  seperator
  messageTextView
@@ -30,21 +30,22 @@ import UIKit
 
 public class FeedbackView : UIView {
   var type:FeedbackType
+  var isLoggedIn:Bool
   public let subjectLabel = UILabel()
   public let messageTextView = ViewWithTextView()
   public let lastInteractionTextView = ViewWithTextView()
   public let environmentTextView = ViewWithTextView()
   public let senderMail = UITextField()
   public let sendButton = UIButton()
-  public let additionalInfoLabel = UILabel()
+  public let senderMailDescriptionLabel = UILabel.descriptionLabel
+  let attachmentsLabel = UILabel.descriptionLabel
   
   public let screenshotAttachmentButton = XImageView()
   public let logAttachmentButton = XImageView()
   
-  init(type: FeedbackType, subject:String, bodyText:String) {
+  init(type: FeedbackType, isLoggedIn: Bool) {
     self.type = type
-    self.subjectLabel.text = subject
-    self.messageTextView.text = bodyText
+    self.isLoggedIn = isLoggedIn
     super.init(frame: .zero)
     setup()
   }
@@ -62,24 +63,16 @@ public class FeedbackView : UIView {
       self?.endEditing(false)
     }
     
-    messageTextView.topMessage = "Ihre Nachhricht"
-    lastInteractionTextView.topMessage = "Letzte Interaktion"
-    environmentTextView.topMessage = "Zustand"
-      
-    messageTextView.placeholder = "Beschreiben Sie ihr Problem bitte hier."
-    lastInteractionTextView.placeholder = "Was waren die letzten Aktionen, die Sie mit der App durchgeführt haben, bevor das Problem aufgetreten ist?"
-    
-    environmentTextView.placeholder = "Beschreiben Sie mögliche Außeneinflüsse bitte hier. War das WLAN an?, Benutzen Sie eine Firewall, Proxy? Gab es Netzwerkprobleme, genügend Speicher, aussreichend Akku..."
-    senderMail.placeholder = "mail@mail.cc"
+    setupText()
     
     //Subject & Send Button
     let hStack1 = UIStackView()
     hStack1.alignment = .fill
     hStack1.axis = .horizontal
     ///Content: subjectLabel
-
+    
     subjectLabel.numberOfLines = 0
-    subjectLabel.font = UIFont.boldSystemFont(ofSize: Const.Size.DefaultFontSize)
+    subjectLabel.font = UIFont.boldSystemFont(ofSize: Const.Size.LargeTitleFontSize)
     /// Content: sendButton Style
     sendButton.isEnabled = true
     sendButton.setBackgroundColor(color: .blue, forState: .normal)
@@ -103,7 +96,7 @@ public class FeedbackView : UIView {
     stack.axis = .vertical
     stack.spacing = 4.0//Seperators increase spacing!
     stack.addArrangedSubview(hStack1)
-    stack.addArrangedSubview(additionalInfoLabel)
+    stack.addArrangedSubview(senderMailDescriptionLabel)
     stack.addArrangedSubview(senderMail)
     senderMail.tag = 0
     stack.addArrangedSubview(UIView.seperator())
@@ -116,9 +109,11 @@ public class FeedbackView : UIView {
       stack.addArrangedSubview(UIView.seperator())
       stack.addArrangedSubview(environmentTextView)
       environmentTextView.tag = 3
+      stack.addArrangedSubview(UIView.seperator())
+      stack.addArrangedSubview(attachmentsLabel)
+      stack.addArrangedSubview(hStack2)
     }
-    stack.addArrangedSubview(UIView.seperator())
-    stack.addArrangedSubview(hStack2)
+    
     
     let scrollView = UIScrollView()
     
@@ -136,5 +131,53 @@ public class FeedbackView : UIView {
     pin(screenshotAttachmentButton, to: hStack2, exclude: .right)
     pin(logAttachmentButton, to: hStack2, exclude: .left)
   }
+  
+  func setupText(){
+    messageTextView.topMessage = "Ihre Nachhricht"
+    lastInteractionTextView.topMessage = "Letzte Interaktion"
+    environmentTextView.topMessage = "Zustand"
+    
+    lastInteractionTextView.placeholder = "Was waren die letzten Aktionen, die Sie mit der App durchgeführt haben, bevor das Problem aufgetreten ist?"
+    
+    environmentTextView.placeholder = "Beschreiben Sie mögliche Außeneinflüsse bitte hier. War das WLAN an?, Benutzen Sie eine Firewall, Proxy? Gab es Netzwerkprobleme, genügend Speicher, aussreichend Akku..."
+    attachmentsLabel.text = "Anhänge"
+    
+    switch type {
+      case .feedback:
+        subjectLabel.text = "Feedback"
+        messageTextView.placeholder = "Ihr Feedback."
+      case .error:
+        subjectLabel.text = "Fehler melden"
+        messageTextView.placeholder = "Beschreiben Sie ihr Problem bitte hier."
+      case .fatalError:
+        subjectLabel.text = "Abbsturz melden"
+        messageTextView.placeholder = "Beschreiben Sie ihr Problem bitte hier."
+    }
+    
+    if isLoggedIn {
+      senderMailDescriptionLabel.text
+        = "Eine Kopie dieses Berichtes wird Ihnen an Ihre taz-ID E-Mail-Adresse oder nachfolgende E-Mail-Adresse zugestellt.";
+      senderMail.placeholder
+        = "Alternative E-Mail (optional)"
+    }
+    else {
+      //User is not logged in
+      senderMailDescriptionLabel.text
+        = "Eine Kopie dieses Berichtes wird Ihnen an nachfolgende E-Mail-Adresse zugestellt."
+      senderMail.placeholder
+        = "Ihre E-Mail für Rückfragen (optional)"
+    }
+  }
 }
 
+extension UILabel{
+  static var descriptionLabel : UILabel {
+    get {
+      let label = UILabel()
+      label.numberOfLines = 0
+      label.font = Const.Fonts.contentFont(size: Const.Size.MiniPageNumberFontSize)
+      label.textColor = Const.SetColor.ForegroundLight.color
+      return label
+    }
+  }
+}
