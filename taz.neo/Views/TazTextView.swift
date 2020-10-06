@@ -16,6 +16,8 @@ import NorthLib
 /// A UITextView with Top Label (for Description), Bottom Label (for Errormessages), Placeholder Label (Placeholder)
 public class ViewWithTextView : UIStackView{
   
+  var textViewheightConstraint:NSLayoutConstraint?
+  
   let topLabel = UILabel()
   let bottomLabel = UILabel()
   let textView = UITextView()
@@ -203,6 +205,11 @@ extension ViewWithTextView : UITextViewDelegate{
     textView.inputAccessoryView = inputToolbar
     if (textView.text == placeholder)
     {
+      if let constraint = textViewheightConstraint {
+        constraint.constant = textView.frame.size.height      }
+      else {
+        textViewheightConstraint = textView.pinHeight(textView.frame.size.height, priority: .defaultHigh)
+      }
       textView.text = ""
       textView.textColor = Const.SetColor.CTDate.color
     }
