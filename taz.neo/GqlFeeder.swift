@@ -812,61 +812,34 @@ open class GqlFeeder: Feeder, DoesLog {
     }
   }
   
-  
   /// send error report to server
   public func errorReport(message:String?,
                           lastAction:String?,
                           conditions:String?,
+                          deviceData:DeviceData?,
                           errorProtocol:String?,
                           eMail:String?,//comes from Server
-                          screenshotName:String?,
-                          screenshot:String?,
-                          finished: @escaping(Result<String,Error>)->()) {
+    screenshotName:String?,
+    screenshot:String?,
+    finished: @escaping(Result<String,Error>)->()) {
     
     guard let gqlSession = self.gqlSession else {
       finished(.failure(fatal("Not connected"))); return
     }
     
-    var ramUsed : String? = nil
-    let ramAvailable : String? = "\(ProcessInfo.processInfo.physicalMemory/(1024 * 1024))MB"
-    var storageAvailable : String? = nil
-    
-    let fileURL = URL(fileURLWithPath: NSHomeDirectory() as String)
-    do {
-      let values = try fileURL.resourceValues(forKeys: [.volumeAvailableCapacityForImportantUsageKey])
-//      values.file      attributes ofFileSystemforPath => Dict nsfilesystemsize & free size filesystemsize in bytes
-      
-      if let capacity = values.volumeAvailableCapacityForImportantUsage {
-        storageAvailable = "\(capacity/(1024 * 1024 * 1024))GB"
-      }
-    } catch {
-      print("Error retrieving capacity: \(error.localizedDescription)")
-    }
-    
-    var taskInfo = mach_task_basic_info()
-    var count = mach_msg_type_number_t(MemoryLayout<mach_task_basic_info>.size)/4
-    let kerr: kern_return_t = withUnsafeMutablePointer(to: &taskInfo) {
-        $0.withMemoryRebound(to: integer_t.self, capacity: 1) {
-            task_info(mach_task_self_, task_flavor_t(MACH_TASK_BASIC_INFO), $0, &count)
-        }
-    }
-    if kerr == KERN_SUCCESS {
-      ramUsed = "\(taskInfo.resident_size/(1024 * 1024))MB"
-    }
-    
     var fields:[String:Any] = [:]
     fields["message"] = message
-        fields["lastAction"] = lastAction
-        fields["conditions"] = "Bitte ignorieren: Ringo entwickelt" //conditions
+    fields["lastAction"] = lastAction
+    fields["conditions"] = "Bitte ignorieren: Ringo entwickelt" //conditions
     fields["deviceOS"] = "iOS \(UIDevice.current.systemVersion)"
     fields["deviceName"] = UIDevice().model
     //    fields["deviceVersion"] = deviceVersion
     fields["appVersion"] = "\(App.name) (\(App.bundleIdentifier)) Ver.:\(App.bundleVersion) #\(App.buildNumber)"
     fields["installationId"] = App.installationId
-    fields["storageAvailable"] = storageAvailable
+    fields["storageAvailable"] = deviceData?.storageAvailable
     //    fields["storageUsed"] = storageUsed
-    fields["ramAvailable"] = ramAvailable
-    fields["ramUsed"] = ramUsed
+    fields["ramAvailable"] = deviceData?.ramAvailable
+    fields["ramUsed"] = deviceData?.ramUsed
     fields["pushToken"] = Defaults.singleton["pushToken"]
     fields["architecture"] = Utsname.machine
     fields["screenshotName"] = screenshotName
@@ -881,16 +854,17 @@ open class GqlFeeder: Feeder, DoesLog {
     let request = "errorReport(\(arrayData.joined(separator: ", ")))"
     
     print(request)
+    finished(Result.success("done"))
     return;
     
     gqlSession.mutation(graphql: request, type: [String:String].self) { (res) in
       var ret: Result<String,Error>
       switch res {
-      case .success(let dict):
-//        let status = dict["whatever"]!
-        print("success_ \(dict)")
-        ret = .success("sended?")
-      case .failure(let err):  ret = .failure(err)
+        case .success(let dict):
+          //        let status = dict["whatever"]!
+          print("success_ \(dict)")
+          ret = .success("sended?")
+        case .failure(let err):  ret = .failure(err)
       }
       finished(ret)
     }

@@ -29,19 +29,163 @@ import NorthLib
  - DONE fix status bar hidden
  - WORKAROUND DONE fix screenshot fullscreen border, not using overlay, not using zoomed ImageView
  - DONE handle difference between feedback and error report
- - evaluate values for free ram & more on open not send
- - show serverdata enable mail field...
+ - DONE evaluate values for free ram & more on open not send
+ -  show serverdata
+ - DONE mail field is enabled permanently // SOLVED DIFFERNTLY enable mail field...
  - handle fatal Errors.. & test...
- - iOS 11/12 Contect Menü Icons?
- - handle empty important fields
+ - DONE iOS 11/12 Contect Menü Icons? ...only doc icon needed context menüs not!
+ - DONE DarkMode Colors
+ - DONE handle empty important fields
  - refactor/mode todos (to own files)
  */
 
-public struct DeviceData {
+class Storage
+{
+
+    static func getFreeSpace() -> Int64
+    {
+        do
+        {
+            let attributes = try FileManager.default.attributesOfFileSystem(forPath: NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0])
+
+            return attributes[FileAttributeKey.systemFreeSize] as! Int64
+        }
+        catch
+        {
+            return 0
+        }
+    }
+
+    static func getTotalSpace() -> Int64
+    {
+        do {
+            let attributes = try FileManager.default.attributesOfFileSystem(forPath: NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0])
+            return attributes[FileAttributeKey.systemSize] as! Int64
+        } catch {
+            return 0
+        }
+    }
+
+    static func getUsedSpace() -> Int64
+    {
+        return getTotalSpace() - getFreeSpace()
+    }
+
+
+
+
+}
+
+
+
+
+public struct DeviceData : DoesLog {
+  typealias ram = (ramUsed:String?, ramAvailable:String?)
+  
+  var ramUsed : String?
+  var ramAvailable : String?
+  var storageAvailable : String?
+  var storageTotal : String?
+  
   init() {
-    freeRam = 2.0
+    
+    print("getTotalSpace: \(Storage.getTotalSpace()/(1024 * 1024))MB")
+    print("getFreeSpace: \(Storage.getFreeSpace()/(1024 * 1024))MB")
+    print("getUsedSpace: \(Storage.getUsedSpace()/(1024 * 1024))MB")
+    let paths = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)
+    let fileURL = URL(fileURLWithPath: paths[0] as String)
+    //Alternative: nsfilesystemsize, free size filesystemsize in bytes
+//    do {
+//      let values = try fileURL.resourceValues(forKeys: [.volumeAvailableCapacityForImportantUsageKey])
+//      if let capacity = values.volumeAvailableCapacityForImportantUsage {
+//        storageAvailable = "\(capacity/(1024 * 1024))MB"
+//        print("volumeAvailableCapacityForImportantUsage: \(capacity/(1024 * 1024))MB")
+//      }
+//    } catch {
+//      log("Error retrieving capacity: \(error.localizedDescription)")
+//    }
+    
+    do {
+      let values = try fileURL.resourceValues(forKeys: [.volumeAvailableCapacityKey])
+      if let capacity = values.volumeAvailableCapacity {
+        storageAvailable = "\(capacity/(1024 * 1024))MB"
+//        print("volumeAvailableCapacity: \(capacity/(1024 * 1024))MB")
+      }
+    } catch {
+      log("Error retrieving capacity: \(error.localizedDescription)")
+    }
+    
+//    do {
+//      let values = try fileURL.resourceValues(forKeys: [.volumeAvailableCapacityForOpportunisticUsageKey])
+//      if let capacity = values.volumeAvailableCapacityForOpportunisticUsage {
+//        print("volumeAvailableCapacityForOpportunisticUsage: \(capacity/(1024 * 1024))MB")
+//      }
+//    } catch {
+//      log("Error retrieving capacity: \(error.localizedDescription)")
+//    }
+    
+    do {
+      let values = try fileURL.resourceValues(forKeys: [.volumeTotalCapacityKey])
+      if let capacity = values.volumeTotalCapacity {
+        storageTotal = "\(capacity/(1024 * 1024))MB"
+//        print("volumeTotalCapacity: \(capacity/(1024 * 1024))MB")
+      }
+    } catch {
+      log("Error retrieving capacity: \(error.localizedDescription)")
+    }
+    
+    let ram = evaluateRam()
+    ramAvailable = ram.ramAvailable
+    ramUsed = ram.ramUsed
   }
-  var freeRam : Float
+  
+  func evaluateRam() -> ram{
+    var ramAvailable:String?
+    var ramUsed:String?
+    
+    var pagesize: vm_size_t = 0
+    
+    let host_port: mach_port_t = mach_host_self()
+    var host_size: mach_msg_type_number_t = mach_msg_type_number_t(MemoryLayout<vm_statistics_data_t>.stride / MemoryLayout<integer_t>.stride)
+    host_page_size(host_port, &pagesize)
+    
+    var vm_stat: vm_statistics = vm_statistics_data_t()
+    withUnsafeMutablePointer(to: &vm_stat) { (vmStatPointer) -> Void in
+      vmStatPointer.withMemoryRebound(to: integer_t.self, capacity: Int(host_size)) {
+        if (host_statistics(host_port, HOST_VM_INFO, $0, &host_size) != KERN_SUCCESS) {
+          log("Error: Failed to fetch vm statistics")
+        }
+      }
+    }
+    
+    let mem_free: Int64 = Int64(vm_stat.free_count) * Int64(pagesize)
+    
+    let mem_used: Int64 = Int64(vm_stat.active_count +
+      vm_stat.inactive_count +
+      vm_stat.wire_count) * Int64(pagesize)
+    ramUsed = "\(mem_used/(1024 * 1024))MB"
+    ramAvailable = "\(mem_free/(1024 * 1024))MB"
+    
+    return (ramUsed, ramAvailable)
+  }
+  
+  func evaluateRamAlternative() -> ram{
+    //Total Ram including not available one
+    let ramAvailable:String = "\(ProcessInfo.processInfo.physicalMemory/(1024 * 1024))MB"
+    var ramUsed:String?
+    
+    var taskInfo = mach_task_basic_info()
+    var count = mach_msg_type_number_t(MemoryLayout<mach_task_basic_info>.size)/4
+    let kerr: kern_return_t = withUnsafeMutablePointer(to: &taskInfo) {
+      $0.withMemoryRebound(to: integer_t.self, capacity: 1) {
+        task_info(mach_task_self_, task_flavor_t(MACH_TASK_BASIC_INFO), $0, &count)
+      }
+    }
+    if kerr == KERN_SUCCESS {
+      ramUsed = "\(taskInfo.resident_size/(1024 * 1024))MB"
+    }
+    return (ramUsed, ramAvailable)
+  }
 }
 
 public enum FeedbackType { case error, feedback, fatalError }
@@ -49,23 +193,23 @@ public enum FeedbackType { case error, feedback, fatalError }
 open class FeedbackComposer : DoesLog{
   
   public static func requestSendFatal(logData: Data? = nil,
-  gqlFeeder: GqlFeeder,
-  finishClosure: @escaping ((Bool) -> ())) {
+                                      gqlFeeder: GqlFeeder,
+                                      finishClosure: @escaping ((Bool) -> ())) {
     print("toDo")
   }
   
   public static func requestFeedback(logData: Data? = nil,
-                          gqlFeeder: GqlFeeder,
-                          finishClosure: @escaping ((Bool) -> ())) {
+                                     gqlFeeder: GqlFeeder,
+                                     finishClosure: @escaping ((Bool) -> ())) {
     let screenshot = UIWindow.screenshot
     
     /******
-    let data = DefaultAuthenticator.getUserData()
-      var tazIdText = ""
-    if let tazID = data.id, tazID.isEmpty == false {
-      tazIdText = " taz-ID: \(tazID)"
-    }
-    */
+     let data = DefaultAuthenticator.getUserData()
+     var tazIdText = ""
+     if let tazID = data.id, tazID.isEmpty == false {
+     tazIdText = " taz-ID: \(tazID)"
+     }
+     */
     let deviceData = DeviceData()
     
     let feedbackAction = UIAlertAction(title: "Feedback geben", style: .default) { _ in
@@ -85,9 +229,9 @@ open class FeedbackComposer : DoesLog{
     let cancelAction = UIAlertAction(title: "Abbrechen", style: .cancel) { _ in finishClosure(false) }
     
     Alert.message(title: "Rückmeldung", message: "Möchten Sie einen Fehler melden oder uns Feedback geben?", actions: [feedbackAction, errorReportAction, cancelAction])
-//    Alert.actionSheet(title: "Rückmeldung",
-//                      message: "Möchten Sie einen Fehler melden oder uns Feedback geben?",
-//                      actions: [feedbackAction, errorReportAction])
+    //    Alert.actionSheet(title: "Rückmeldung",
+    //                      message: "Möchten Sie einen Fehler melden oder uns Feedback geben?",
+    //                      actions: [feedbackAction, errorReportAction])
   }
   
   public static func send(type: FeedbackType,
@@ -106,13 +250,13 @@ open class FeedbackComposer : DoesLog{
     
     let feedbackViewController = FeedbackViewController(type: type,
                                                         screenshot: screenshot,
+                                                        deviceData: deviceData,
                                                         logData: logData,
                                                         gqlFeeder: gqlFeeder,
                                                         finishClosure: {
                                                           (send) in
                                                           feedbackBottomSheet?.sendSuccees = send
-                                                          feedbackBottomSheet?.close()
-                                                          finishClosure(send)
+                                                          feedbackBottomSheet?.close()//Calls Closure
     })
     
     feedbackBottomSheet = FeedbackBottomSheet(slider: feedbackViewController,
@@ -121,11 +265,16 @@ open class FeedbackComposer : DoesLog{
     feedbackBottomSheet?.coverageRatio = 1.0
     
     feedbackBottomSheet?.onUserSlideToClose = ({
-      feedbackBottomSheet?.slide(toOpen: true, animated: true)
+      guard let feedbackBottomSheet = feedbackBottomSheet else { return }
+      if feedbackBottomSheet.sendSuccees {
+        feedbackBottomSheet.slide(toOpen: false, animated: true)
+        return
+      }
+      feedbackBottomSheet.slide(toOpen: true, animated: true)
       Alert.confirm(message: Localized("feedback_cancel_title"),
                     isDestructive: true) { (close) in
                       if close {
-                        feedbackBottomSheet?.slide(toOpen: false, animated: true)
+                        feedbackBottomSheet.slide(toOpen: false, animated: true)
                       }
       }
     })

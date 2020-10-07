@@ -35,7 +35,7 @@ public class FeedbackView : UIView {
   public let messageTextView = ViewWithTextView()
   public let lastInteractionTextView = ViewWithTextView()
   public let environmentTextView = ViewWithTextView()
-  public let senderMail = UITextField()
+  public let senderMail = ViewWithTextField()
   public let sendButton = UIButton()
   public let senderMailDescriptionLabel = UILabel.descriptionLabel
   let attachmentsLabel = UILabel.descriptionLabel
@@ -65,6 +65,15 @@ public class FeedbackView : UIView {
     
     setupText()
     
+    if type == FeedbackType.feedback {
+      sendButton.isEnabled = false
+      messageTextView.delegate = self
+    } else {
+      sendButton.isEnabled = true
+    }
+    
+    senderMail.delegate = self
+    
     //Subject & Send Button
     let hStack1 = UIStackView()
     hStack1.alignment = .fill
@@ -72,9 +81,9 @@ public class FeedbackView : UIView {
     ///Content: subjectLabel
     
     subjectLabel.numberOfLines = 0
+    subjectLabel.textColor = Const.SetColor.CTDate.color
     subjectLabel.font = UIFont.boldSystemFont(ofSize: Const.Size.LargeTitleFontSize)
     /// Content: sendButton Style
-    sendButton.isEnabled = true
     sendButton.setBackgroundColor(color: .blue, forState: .normal)
     sendButton.setBackgroundColor(color: .lightGray, forState: .disabled)
     sendButton.layer.cornerRadius = 21
@@ -165,8 +174,60 @@ public class FeedbackView : UIView {
       senderMailDescriptionLabel.text
         = "Eine Kopie dieses Berichtes wird Ihnen an nachfolgende E-Mail-Adresse zugestellt."
       senderMail.placeholder
-        = "Ihre E-Mail für Rückfragen (optional)"
+        = "Ihre E-Mail für Rückmeldungen (optional)"
     }
+  }
+}
+
+
+
+extension FeedbackView {
+  var isSenderMailValid : Bool {
+    get {
+      if (senderMail.text ?? "").isEmpty { return true }
+      if (senderMail.text ?? "").isValidEmail() { return true }
+      return false
+    }
+  }
+  
+  var isMessageFieldValid : Bool {
+    get {
+      if type != FeedbackType.feedback { return true }
+      return messageTextView.isFilled
+    }
+  }
+  
+  public var canSend : Bool {
+    get { return isSenderMailValid && isMessageFieldValid }
+  }
+  
+  func checkSendButton(){
+    sendButton.isEnabled = canSend
+  }
+}
+
+extension FeedbackView : UITextViewDelegate{
+  
+//  public func textViewDidChange(_ textView: UITextView){
+//
+//  }
+  
+  public func textViewDidEndEditing(_ textView: UITextView){
+    if textView != messageTextView.textView { return }
+    checkSendButton()
+    messageTextView.bottomMessage = isMessageFieldValid
+    ? nil
+    : "Darf nicht leer sein"
+  }
+}
+
+extension FeedbackView : UITextFieldDelegate{
+  public func textFieldDidEndEditing(_ textField: UITextField){
+    if textField != senderMail.textfield { return}//only handle this here!
+    checkSendButton()
+    senderMail.bottomMessage = isSenderMailValid
+    ? nil
+    : "Muss E-Mail oder leer sein"
   }
 }
 

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		00142CFE252DF08E006BE027 /* ViewWithTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00142CFD252DF08E006BE027 /* ViewWithTextField.swift */; };
 		0015B73724DD86B30037A8D6 /* Authenticator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0015B73524DD86B30037A8D6 /* Authenticator.swift */; };
 		0015B73824DD86B30037A8D6 /* SimpleAuthenticator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0015B73624DD86B30037A8D6 /* SimpleAuthenticator.swift */; };
 		0015B73A24DD87DA0037A8D6 /* DefaultAuthenticator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0015B73924DD87DA0037A8D6 /* DefaultAuthenticator.swift */; };
@@ -90,6 +91,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		00142CFD252DF08E006BE027 /* ViewWithTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewWithTextField.swift; sourceTree = "<group>"; };
 		0015B73524DD86B30037A8D6 /* Authenticator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Authenticator.swift; sourceTree = "<group>"; };
 		0015B73624DD86B30037A8D6 /* SimpleAuthenticator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SimpleAuthenticator.swift; sourceTree = "<group>"; };
 		0015B73924DD87DA0037A8D6 /* DefaultAuthenticator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultAuthenticator.swift; sourceTree = "<group>"; };
@@ -234,6 +236,7 @@
 				AEF2DF2E244709CC00D1482D /* IssueCarousel.swift */,
 				AEF2DF34244766E400D1482D /* MomentView.swift */,
 				00D4A0562527661100743D5F /* TazTextView.swift */,
+				00142CFD252DF08E006BE027 /* ViewWithTextField.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -510,6 +513,7 @@
 				AE76F9FB245497F80043F497 /* IntroVC.swift in Sources */,
 				AE08C49F2412B66400D41E91 /* ConfigDefaults.swift in Sources */,
 				AEC7D467249920DF008630FB /* PdfTest.swift in Sources */,
+				00142CFE252DF08E006BE027 /* ViewWithTextField.swift in Sources */,
 				AEF2DF2F244709CC00D1482D /* IssueCarousel.swift in Sources */,
 				0015B73824DD86B30037A8D6 /* SimpleAuthenticator.swift in Sources */,
 				AEBAF596219ACFAC00566205 /* AppDelegate.swift in Sources */,

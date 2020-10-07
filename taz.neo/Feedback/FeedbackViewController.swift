@@ -39,6 +39,7 @@ public class FeedbackViewController : UIViewController{
     }
   }
   var logData: Data? = nil
+  var deviceData: DeviceData?
   var gqlFeeder: GqlFeeder?
   var finishClosure: ((Bool) -> ())?
   
@@ -46,6 +47,7 @@ public class FeedbackViewController : UIViewController{
   
   init(type: FeedbackType,
        screenshot: UIImage? = nil,
+       deviceData: DeviceData? = nil,
        logData: Data? = nil,
        gqlFeeder: GqlFeeder,
        finishClosure: @escaping ((Bool) -> ())) {
@@ -53,6 +55,7 @@ public class FeedbackViewController : UIViewController{
                                      isLoggedIn: gqlFeeder.authToken != nil )
     self.screenshot = screenshot
     self.type = type
+    self.deviceData = deviceData
     self.logData = logData
     self.gqlFeeder = gqlFeeder
     self.finishClosure = finishClosure
@@ -89,7 +92,6 @@ public class FeedbackViewController : UIViewController{
       self?.showLog()
     }
     
-    feedbackView.messageTextView.delegate = self
     /// Setup Attatchment Menus
     _ = logAttatchmentMenu
     _ = screenshotAttatchmentMenu
@@ -99,13 +101,44 @@ public class FeedbackViewController : UIViewController{
                                       for: .touchUpInside)
   }
   
-  @objc public func handleSend(){
+  //MARK: handleSend()
+  @objc public func handleSend(_ force : Bool = false){
     //Wollen Sie den Report ohne weitere Angaben senden?
-    guard let feedbackView = feedbackView,
-      feedbackView.messageTextView.isFilled,
-      let message = feedbackView.messageTextView.text else {
-      log("Send not possible no message")
+    guard let feedbackView = feedbackView else {
+      log("No Form, send not possible")
       return;
+    }
+    
+    feedbackView.endEditing(false)//Resign First Responder
+    
+    if feedbackView.canSend == false {
+      log("Send not possible")
+      return;
+    }
+    
+    var emptyFields:[String] = []
+    let err = type != FeedbackType.feedback
+    
+    if !feedbackView.messageTextView.isFilled{ emptyFields.append("Nachricht")}
+    if err && !feedbackView.lastInteractionTextView.isFilled{
+      emptyFields.append("Letzte Interaktion")
+    }
+    if err && !feedbackView.environmentTextView.isFilled{
+      emptyFields.append("Zustand")
+    }
+    
+    if force == false && emptyFields.count > 0 {
+      var message = emptyFields.count == 1
+        ? "Das Feld \(emptyFields.joined()) ist leer."
+        : "Die Felder \(emptyFields.joined(separator: ", ")) sind leer."
+      message += " Möchten Sie das Formular trotzdem senden?"
+      
+      Alert.confirm(title: "Wirklich senden?", message: message, okText: "Senden") { (send) in
+        if send == true {
+          self.handleSend(true)
+        }
+      }
+      return 
     }
     
     var screenshotData : String?
@@ -122,14 +155,22 @@ public class FeedbackViewController : UIViewController{
     //    }
     
     
-    gqlFeeder?.errorReport(message: message,
+    gqlFeeder?.errorReport(message: feedbackView.messageTextView.text,
                            lastAction: feedbackView.lastInteractionTextView.text,
                            conditions: feedbackView.environmentTextView.text,
+                           deviceData: deviceData,
                            errorProtocol: logString,
                            eMail: feedbackView.senderMail.text,
                            screenshotName: screenshotName,
                            screenshot: screenshotData) { (result) in
-                            print("Result")
+                            switch result{
+                              case .success(let msg):
+                                self.log("Error Report send success: \(msg)")
+                                self.finishClosure?(true)
+                              case .failure(let err):
+                                self.log("Error Report send failure: \(err)")
+                                self.finishClosure?(false)
+                            }
     }
   }
   
@@ -235,7 +276,7 @@ public class FeedbackViewController : UIViewController{
     menu.addMenuItem(title: "Löschen", icon: "trash.circle") { (_) in
       self.feedbackView?.logAttachmentButton.removeFromSuperview()
     }
-    menu.addMenuItem(title: "Abbrechen", icon: "multiply.circle") { (_) in }
+    menu.iosHigher13?.addMenuItem(title: "Abbrechen", icon: "multiply.circle") { (_) in }
     return menu
   }()
   
@@ -249,7 +290,7 @@ public class FeedbackViewController : UIViewController{
       self.feedbackView?.screenshotAttachmentButton.removeFromSuperview()
       //self.screenshot = nil
     }
-    menu.addMenuItem(title: "Abbrechen", icon: "multiply.circle") { (_) in }
+    menu.iosHigher13?.addMenuItem(title: "Abbrechen", icon: "multiply.circle") { (_) in }
     return menu
   }()
   
@@ -299,13 +340,5 @@ class OverlayViewController : UIViewController{
   
   deinit {
     print("deinit OverlayViewController")
-  }
-}
-
-extension FeedbackViewController : UITextViewDelegate {
-  public func textViewDidEndEditing(_ textView: UITextView){
-    if textView == self.feedbackView?.messageTextView {
-      self.feedbackView?.sendButton.isEnabled = !textView.text.isEmpty
-    }
   }
 }

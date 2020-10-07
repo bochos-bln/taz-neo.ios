@@ -18,7 +18,7 @@ public class ViewWithTextView : UIStackView{
   
   var textViewheightConstraint:NSLayoutConstraint?
   
-  var isFilled:Bool{ get {return text != placeholder}}
+  var isFilled:Bool{ get {return self.textView.text != placeholder}}
   
   let topLabel = UILabel()
   let bottomLabel = UILabel()
@@ -37,7 +37,8 @@ public class ViewWithTextView : UIStackView{
   }
   
   var text: String?{
-    get { return self.textView.text}
+    get {
+      return isFilled ? self.textView.text : nil}
     set {
       self.textView.text = newValue
       verifyPlaceholder()
@@ -85,8 +86,9 @@ public class ViewWithTextView : UIStackView{
     textView.textContainer.lineFragmentPadding = 0
     textView.isScrollEnabled = false
     textView.text = text
+    textView.backgroundColor = .clear
     
-    self.textViewDidBeginEditing(textView)
+//    self.textViewDidBeginEditing(textView)
   }
   
   required init(coder: NSCoder) {
