@@ -16,6 +16,7 @@
 		0032A4DB24C89F1100284723 /* PwForgotController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0032A4DA24C89F1100284723 /* PwForgotController.swift */; };
 		004D4EFE24ACDBA7008C4EE7 /* LoginController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 004D4EFD24ACDBA7008C4EE7 /* LoginController.swift */; };
 		004D4F0024ACDC1F008C4EE7 /* FormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 004D4EFF24ACDC1F008C4EE7 /* FormView.swift */; };
+		00558559252EF1630068A262 /* DeviceData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00558558252EF1630068A262 /* DeviceData.swift */; };
 		006007E224D1D333001680B6 /* TrialSubscriptionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 006007E124D1D333001680B6 /* TrialSubscriptionController.swift */; };
 		006E17E924D418090092DC0D /* FormComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 006E17E824D418090092DC0D /* FormComponents.swift */; };
 		00D4A0572527661100743D5F /* TazTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00D4A0562527661100743D5F /* TazTextView.swift */; };
@@ -100,6 +101,7 @@
 		0032A4DA24C89F1100284723 /* PwForgotController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PwForgotController.swift; sourceTree = "<group>"; };
 		004D4EFD24ACDBA7008C4EE7 /* LoginController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginController.swift; sourceTree = "<group>"; };
 		004D4EFF24ACDC1F008C4EE7 /* FormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormView.swift; sourceTree = "<group>"; };
+		00558558252EF1630068A262 /* DeviceData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceData.swift; sourceTree = "<group>"; };
 		006007E124D1D333001680B6 /* TrialSubscriptionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrialSubscriptionController.swift; sourceTree = "<group>"; };
 		006E17E824D418090092DC0D /* FormComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormComponents.swift; sourceTree = "<group>"; };
 		00D4A0562527661100743D5F /* TazTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TazTextView.swift; sourceTree = "<group>"; };
@@ -212,6 +214,7 @@
 				00D4A05B25277F6900743D5F /* FeedbackViewController.swift */,
 				00D4A05D25277F7900743D5F /* FeedbackView.swift */,
 				00D4A05F25277FA100743D5F /* FeedbackHelper.swift */,
+				00558558252EF1630068A262 /* DeviceData.swift */,
 			);
 			path = Feedback;
 			sourceTree = "<group>";
@@ -524,6 +527,7 @@
 				AEF2DF3324475A6200D1482D /* CarouselController.swift in Sources */,
 				AE5D9EC523E2CD5F0002C3B8 /* DLController.swift in Sources */,
 				006E17E924D418090092DC0D /* FormComponents.swift in Sources */,
+				00558559252EF1630068A262 /* DeviceData.swift in Sources */,
 				004D4EFE24ACDBA7008C4EE7 /* LoginController.swift in Sources */,
 				00D4A05E25277F7900743D5F /* FeedbackView.swift in Sources */,
 				AE4AA2B823F6BEC400EAFE78 /* LoadingView.swift in Sources */,

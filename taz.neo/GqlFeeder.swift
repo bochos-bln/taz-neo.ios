@@ -853,9 +853,9 @@ open class GqlFeeder: Feeder, DoesLog {
     arrayData += "errorProtocol: \(errorProtocol?.quote() ?? "-")"
     let request = "errorReport(\(arrayData.joined(separator: ", ")))"
     
-    print(request)
-    finished(Result.success("done"))
-    return;
+//    print(request)
+//    finished(Result.success("done"))
+//    return;
     
     gqlSession.mutation(graphql: request, type: [String:String].self) { (res) in
       var ret: Result<String,Error>

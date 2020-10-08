@@ -62,7 +62,8 @@ public class FeedbackView : UIView {
     self.onTapping { [weak self] (_) in
       self?.endEditing(false)
     }
-    
+    logAttachmentButton.addBorder(.red)
+    screenshotAttachmentButton.addBorder(.red)
     setupText()
     
     if type == FeedbackType.feedback {
