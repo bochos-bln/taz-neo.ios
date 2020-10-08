@@ -93,6 +93,51 @@ public struct DeviceData : DoesLog {
    
    free ram =   evaluateRamAlternative ramAvailable Optional("1000MB") -   evaluateRam ramUsed Optional("746MB")  -   phys_footprint: 96.03173MB
    
+   
+   
+   Error with task_info(): (os/kern) invalid argument
+   Free: 151)
+   51
+   mem_free: 11, mem_used: 848, mem_sum: 859 pagesize: 4096
+   internal: 43.69922MB
+   compressed: 4.2890625MB
+   compressed+internal: 47.98828MB
+   phys_footprint: 51.622185MB
+   limit_bytes_remaining: 0.0MB
+   ledger_phys_footprint_peak: 0.0MB
+   device: 0.0MB
+   resident_size: 204.52734MB
+   virtual_size: 4807.8203MB
+   formattedMemoryFootprint: 51.62218475341797MB
+   appsize: 86.2755537033081MB
+   getTotalSpace: 15258MB
+   getFreeSpace: 4389MB
+   getUsedSpace: 10868MB
+   volumeAvailableCapacityForImportantUsage: 5536MB
+   volumeAvailableCapacity: 4389MB
+   volumeAvailableCapacityForOpportunisticUsage: 4312MB
+   volumeTotalCapacity: 15258MB
+   activecount: 297MB
+   inactive_count: 300MB
+   wire_count: 247MB
+   free_count: 13MB
+   activecount+inactive_count+wire_count: 845MB
+   activecount+inactive_count+wire_count+free_count: 859MB
+   evaluateRam ramAvailable Optional("13MB")
+   evaluateRam ramUsed Optional("845MB")
+   evaluateRamAlternative ramAvailable Optional("1000MB")
+   evaluateRamAlternative ramUsed Optional("204MB")
+
+   
+   REAL
+   taz=51,8MB **GOTIT**
+   other = 741,2MB
+   Free = **207MB** **WANTIT**
+   = 1000 **HAVE**
+   taz+other = 793
+    1000 - 793 = **207**
+   1024 - 793 = **231**
+   
    */
   
   
@@ -115,7 +160,6 @@ public struct DeviceData : DoesLog {
          }
        }
      }
-    
     
     let totalUsedRam = (UInt64(vm_stat.active_count+vm_stat.inactive_count+vm_stat.wire_count)*UInt64(pagesize))
     print("Free: \((totalRam-totalUsedRam)/(sudivider)))")
