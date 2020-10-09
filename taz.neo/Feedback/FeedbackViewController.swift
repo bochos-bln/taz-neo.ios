@@ -9,23 +9,6 @@
 import Foundation
 import NorthLib
 
-/**
- Feedback oder Fehler
- 
- Bei Feedback Ihre Nachricht
- 
- bei Fehler:
- 
- Ihre Nachhricht
- Beschreiben Sie ihr Problem bitte hier.
- 
- Letzte Interaktion
- Was waren die letzten Aktionen, die Sie mit der App durchgeführt haben, bevor das Problem aufgetreten ist?
- 
- Zustand
- Beschreiben Sie mögliche Außeneinflüsse bitte hier. War das WLAN an?, Benutzen Sie eine Firewall, Proxy? Gab es Netzwerkprobleme, genügend Speicher, aussreichend Akku...
- */
-
 public class FeedbackViewController : UIViewController{
   
   deinit {
