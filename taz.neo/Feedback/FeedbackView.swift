@@ -29,6 +29,7 @@ import UIKit
  */
 
 public class FeedbackView : UIView {
+  let attachmentButtonHeight : CGFloat = 110
   var type:FeedbackType
   var isLoggedIn:Bool
   public let subjectLabel = UILabel()
@@ -62,8 +63,6 @@ public class FeedbackView : UIView {
     self.onTapping { [weak self] (_) in
       self?.endEditing(false)
     }
-    logAttachmentButton.addBorder(.red)
-    screenshotAttachmentButton.addBorder(.red)
     setupText()
     
     if type == FeedbackType.feedback {
@@ -74,6 +73,8 @@ public class FeedbackView : UIView {
     }
     
     senderMail.delegate = self
+    senderMail.textfield.keyboardType = .emailAddress
+    senderMail.textfield.textContentType = .emailAddress
     
     //Subject & Send Button
     let hStack1 = UIStackView()
@@ -136,8 +137,10 @@ public class FeedbackView : UIView {
     
     ///Set Constraints after added to Stack View otherwise Contraint Errosrs are displayed
     sendButton.pinSize(CGSize(width: 42, height: 42))
-    screenshotAttachmentButton.pinHeight(70)
-    logAttachmentButton.pinHeight(70)
+    screenshotAttachmentButton.pinHeight(attachmentButtonHeight)
+    logAttachmentButton.pinHeight(attachmentButtonHeight)
+    logAttachmentButton.addBasicShadow()
+    screenshotAttachmentButton.addBasicShadow()
     pin(screenshotAttachmentButton, to: hStack2, exclude: .right)
     pin(logAttachmentButton, to: hStack2, exclude: .left)
   }
@@ -166,14 +169,14 @@ public class FeedbackView : UIView {
     
     if isLoggedIn {
       senderMailDescriptionLabel.text
-        = "Eine Kopie dieses Berichtes wird Ihnen an Ihre taz-ID E-Mail-Adresse oder nachfolgende E-Mail-Adresse zugestellt.";
+        = "Für Rückfragen und Antwort nutzen wir Ihre taz-ID E-Mail-Adresse oder nachfolgende E-Mail-Adresse.";
       senderMail.placeholder
         = "Alternative E-Mail (optional)"
     }
     else {
       //User is not logged in
       senderMailDescriptionLabel.text
-        = "Eine Kopie dieses Berichtes wird Ihnen an nachfolgende E-Mail-Adresse zugestellt."
+        = "Rückfragen und Antworten sollen an nachfolgende E-Mail-Adresse zugestellt werden."
       senderMail.placeholder
         = "Ihre E-Mail für Rückmeldungen (optional)"
     }
@@ -241,5 +244,14 @@ extension UILabel{
       label.textColor = Const.SetColor.ForegroundLight.color
       return label
     }
+  }
+}
+
+extension UIView{
+  func addBasicShadow(){
+    self.layer.shadowOpacity = 0.25
+    self.layer.shadowOffset = CGSize(width: 2, height: 2)
+    self.layer.shadowRadius = 4
+    self.layer.shadowColor = Const.SetColor.CTDate.color.cgColor
   }
 }

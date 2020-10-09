@@ -23,25 +23,24 @@ public struct DeviceData : DoesLog {
   
   /// Used Storage by current App (little bit less than Settings->PhoneStorage-> App used->Doc&Data)
   /// Did not contain the App-Size itself
-  var storageTotal : String?
+  var storageUsed : String?
   
   init() {
     var _dc:DeviceDataCollect? = DeviceDataCollect()
     if let dc = _dc {
       
-      ramAvailable = "\(dc.freeMemory()/(1024 * 1024))MB"
+      ramAvailable = "\(dc.freeMemory())"
       
       if let used = dc.appUsedRam() {
-        ramUsed = "\(UInt64(used/(1024 * 1024)))MB"
+        ramUsed = "\(used)"
       }
       
       if let free = dc.freeStorage() {
-        storageAvailable = "\(Int64(free/(1024 * 1024)))MB"
+        storageAvailable = "\(free)"
       }
       
-      storageTotal = "\(UInt64(dc.storageUsedByApp()/(1024 * 1024)))MB"
+      storageUsed = "\(dc.storageUsedByApp())"
     }
-    
     _dc = nil
   }
   

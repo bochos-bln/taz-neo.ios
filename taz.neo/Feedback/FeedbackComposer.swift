@@ -36,7 +36,10 @@ import NorthLib
  - DONE iOS 11/12 Contect Menü Icons? ...only doc icon needed context menüs not!
  - DONE DarkMode Colors
  - DONE handle empty important fields
- - refactor/mode todos (to own files)
+ - DONE refactor/mode todos (to own files)
+ - DONE Prevent Multi Send /Block UI
+ - DONE RESIZE Image to have smaller send footprint
+ - FEEDBACK REQUIRED make the buttons similar 
  */
 
 public enum FeedbackType { case error, feedback, fatalError }
@@ -53,14 +56,6 @@ open class FeedbackComposer : DoesLog{
                                      gqlFeeder: GqlFeeder,
                                      finishClosure: @escaping ((Bool) -> ())) {
     let screenshot = UIWindow.screenshot
-    
-    /******
-     let data = DefaultAuthenticator.getUserData()
-     var tazIdText = ""
-     if let tazID = data.id, tazID.isEmpty == false {
-     tazIdText = " taz-ID: \(tazID)"
-     }
-     */
     let deviceData = DeviceData()
     
     let feedbackAction = UIAlertAction(title: "Feedback geben", style: .default) { _ in
@@ -80,9 +75,6 @@ open class FeedbackComposer : DoesLog{
     let cancelAction = UIAlertAction(title: "Abbrechen", style: .cancel) { _ in finishClosure(false) }
     
     Alert.message(title: "Rückmeldung", message: "Möchten Sie einen Fehler melden oder uns Feedback geben?", actions: [feedbackAction, errorReportAction, cancelAction])
-    //    Alert.actionSheet(title: "Rückmeldung",
-    //                      message: "Möchten Sie einen Fehler melden oder uns Feedback geben?",
-    //                      actions: [feedbackAction, errorReportAction])
   }
   
   public static func send(type: FeedbackType,
@@ -99,17 +91,17 @@ open class FeedbackComposer : DoesLog{
     
     var feedbackBottomSheet : FeedbackBottomSheet?
     
-    let feedbackViewController = FeedbackViewController(type: type,
-                                                        screenshot: screenshot,
-                                                        deviceData: deviceData,
-                                                        logData: logData,
-                                                        gqlFeeder: gqlFeeder,
-                                                        finishClosure: {
-                                                          (send) in
-                                                          feedbackBottomSheet?.sendSuccees = send
-                                                          feedbackBottomSheet?.close()//Calls Closure
-    })
-    
+    let feedbackViewController
+      = FeedbackViewController(
+        type: type,
+        screenshot: screenshot,
+        deviceData: deviceData,
+        logData: logData,
+        gqlFeeder: gqlFeeder){
+          feedbackBottomSheet?.slide(toOpen: false, animated: true)
+          
+    }
+                                                       
     feedbackBottomSheet = FeedbackBottomSheet(slider: feedbackViewController,
                                               into: currentVc)
     feedbackBottomSheet?.sliderView.backgroundColor = Const.SetColor.CTBackground.color
@@ -117,10 +109,6 @@ open class FeedbackComposer : DoesLog{
     
     feedbackBottomSheet?.onUserSlideToClose = ({
       guard let feedbackBottomSheet = feedbackBottomSheet else { return }
-      if feedbackBottomSheet.sendSuccees {
-        feedbackBottomSheet.slide(toOpen: false, animated: true)
-        return
-      }
       feedbackBottomSheet.slide(toOpen: true, animated: true)
       Alert.confirm(message: Localized("feedback_cancel_title"),
                     isDestructive: true) { (close) in
@@ -131,11 +119,7 @@ open class FeedbackComposer : DoesLog{
     })
     
     feedbackBottomSheet?.onClose(closure: { (slider) in
-      var sendSuccess = false
-      if let fb = feedbackBottomSheet {
-        sendSuccess = fb.sendSuccees
-      }
-      finishClosure(sendSuccess)
+      finishClosure(feedbackViewController.sendSuccess)
       feedbackBottomSheet = nil//Important the memory leak!
     })
     feedbackBottomSheet?.open()

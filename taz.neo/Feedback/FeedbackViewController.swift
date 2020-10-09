@@ -38,10 +38,23 @@ public class FeedbackViewController : UIViewController{
       feedbackView?.screenshotAttachmentButton.image = screenshot
     }
   }
+  
+  var sendSuccess:Bool = false
+  
+  let blockingView = BlockingProcessView()
+  
+  var uiBlocked:Bool = false {
+    didSet{
+      feedbackView?.sendButton.isEnabled = !uiBlocked
+      blockingView.isHidden = !uiBlocked
+      blockingView.enabled = uiBlocked
+    }
+  }
+  
   var logData: Data? = nil
   var deviceData: DeviceData?
   var gqlFeeder: GqlFeeder?
-  var finishClosure: ((Bool) -> ())?
+  var closeClosure: (() -> ())?
   
   public var feedbackView : FeedbackView?
   
@@ -50,7 +63,7 @@ public class FeedbackViewController : UIViewController{
        deviceData: DeviceData? = nil,
        logData: Data? = nil,
        gqlFeeder: GqlFeeder,
-       finishClosure: @escaping ((Bool) -> ())) {
+       finishClosure: (() -> ())?) {
     self.feedbackView = FeedbackView(type: type,
                                      isLoggedIn: gqlFeeder.authToken != nil )
     self.screenshot = screenshot
@@ -58,7 +71,7 @@ public class FeedbackViewController : UIViewController{
     self.deviceData = deviceData
     self.logData = logData
     self.gqlFeeder = gqlFeeder
-    self.finishClosure = finishClosure
+    self.closeClosure = finishClosure
     super.init(nibName: nil, bundle: nil)
   }
   
@@ -68,7 +81,7 @@ public class FeedbackViewController : UIViewController{
     self.screenshot = nil
     self.logData = nil
     self.gqlFeeder = nil
-    self.finishClosure = nil
+    self.closeClosure = nil
   }
   
   required init?(coder: NSCoder) {
@@ -81,8 +94,14 @@ public class FeedbackViewController : UIViewController{
     //didSet not called in init, so set the button`s image here
     feedbackView.screenshotAttachmentButton.image = screenshot
     
+    if let img = screenshot, img.size.height > 0, img.size.width > 0 {
+      feedbackView.logAttachmentButton.pinWidth(feedbackView.attachmentButtonHeight * img.size.width / img.size.height, priority: .required)
+    }
+    
     self.view.addSubview(feedbackView)
     pin(feedbackView, to:self.view)
+    self.view.addSubview(blockingView)
+    pin(blockingView, to:self.view)
     
     feedbackView.screenshotAttachmentButton.onTapping { [weak self] (_) in
       self?.showScreenshot()
@@ -108,7 +127,7 @@ public class FeedbackViewController : UIViewController{
       log("No Form, send not possible")
       return;
     }
-    
+    uiBlocked = true
     feedbackView.endEditing(false)//Resign First Responder
     
     if feedbackView.canSend == false {
@@ -144,18 +163,24 @@ public class FeedbackViewController : UIViewController{
     var screenshotData : String?
     var screenshotName : String?
     
-    //    if let sc = screenshot {
-    //      screenshotData = sc.pngData()?.base64EncodedString()
-    //      screenshotName = "Screenshot_\(Date())"
-    //    }
-    //
+    if let sc = screenshot {
+      let img
+        = sc.resized(targetSize: CGSize(width: UIScreen.main.bounds.size.width*0.6,
+                                        height: UIScreen.main.bounds.size.height*0.6))
+      screenshotData = img.pngData()?.base64EncodedString()
+      screenshotName = "Screenshot_\(Date())"
+    }
+    
     var logString:String?
-    //    if let data = logData {
-    //      logString = String(data:data , encoding: .utf8)
-    //    }
+    if let data = logData {
+      logString = String(data:data , encoding: .utf8)
+    }
     
+    let message = type == FeedbackType.feedback
+      ? "Feedback\n=============\n\(feedbackView.messageTextView.text ?? "-")"
+      : feedbackView.messageTextView.text
     
-    gqlFeeder?.errorReport(message: feedbackView.messageTextView.text,
+    gqlFeeder?.errorReport(message: message,
                            lastAction: feedbackView.lastInteractionTextView.text,
                            conditions: feedbackView.environmentTextView.text,
                            deviceData: deviceData,
@@ -163,16 +188,32 @@ public class FeedbackViewController : UIViewController{
                            eMail: feedbackView.senderMail.text,
                            screenshotName: screenshotName,
                            screenshot: screenshotData) { (result) in
+                            self.uiBlocked = false
                             switch result{
                               case .success(let msg):
                                 self.log("Error Report send success: \(msg)")
-                                self.finishClosure?(true)
+                                self.sendSuccess = msg
+                                self.closeClosure?()
                               case .failure(let err):
                                 self.log("Error Report send failure: \(err)")
-                                self.finishClosure?(false)
+                                self.handleSendFail()
                             }
     }
   }
+  
+  func handleSendFail(){
+     Alert.confirm(title: "Erneut versuchen?",
+      message: "Report konnte nicht gesendet werden!\nBitte überprüfen Sie Ihre Internetverbindung und versuchen Sie es erneut.\nSollte das Problem weiter bestehen, senden Sie uns bitte eine E-Mail an:\n \(Localized("digiabo_email"))",
+                       isDestructive: false) { (try_again) in
+                         if try_again {
+                           self.handleSend(true)
+                         } else {
+                           self.closeClosure?()
+                        }
+         }
+  }
+  
+  
   
   //overlay+zoomed image view => wrong target has unwanted paddings
   func showScreenshotZiV(){
@@ -275,6 +316,7 @@ public class FeedbackViewController : UIViewController{
     }
     menu.addMenuItem(title: "Löschen", icon: "trash.circle") { (_) in
       self.feedbackView?.logAttachmentButton.removeFromSuperview()
+      self.logData = nil
     }
     menu.iosHigher13?.addMenuItem(title: "Abbrechen", icon: "multiply.circle") { (_) in }
     return menu
@@ -288,6 +330,7 @@ public class FeedbackViewController : UIViewController{
     }
     menu.addMenuItem(title: "Löschen", icon: "trash.circle") { (_) in
       self.feedbackView?.screenshotAttachmentButton.removeFromSuperview()
+      self.screenshot = nil
       //self.screenshot = nil
     }
     menu.iosHigher13?.addMenuItem(title: "Abbrechen", icon: "multiply.circle") { (_) in }
