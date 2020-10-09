@@ -735,7 +735,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 0.4.16;
-				PRODUCT_BUNDLE_IDENTIFIER = de.taz.taz.neo;
+				PRODUCT_BUNDLE_IDENTIFIER = de.taz.taz.2;
 				PRODUCT_NAME = "die tageszeitung";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -761,7 +761,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 0.4.16;
-				PRODUCT_BUNDLE_IDENTIFIER = de.taz.taz.neo;
+				PRODUCT_BUNDLE_IDENTIFIER = de.taz.taz.2;
 				PRODUCT_NAME = "die tageszeitung";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
