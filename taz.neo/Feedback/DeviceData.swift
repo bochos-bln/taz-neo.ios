@@ -40,16 +40,6 @@ public struct DeviceData : DoesLog {
       }
       
       storageTotal = "\(UInt64(dc.storageUsedByApp()/(1024 * 1024)))MB"
-//Looks pretty good
-//      print("""
-//        Memory Report
-//        ====================
-//        ramAvailable : \(ramAvailable ?? "-")
-//        ramUsed: \(ramUsed ?? "-")
-//        storageAvailable: \(storageAvailable ?? "-")
-//        storageTotal: \(storageTotal ?? "-")
-//
-//        """)
     }
     
     _dc = nil
