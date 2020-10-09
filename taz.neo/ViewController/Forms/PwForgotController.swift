@@ -52,13 +52,11 @@ class PwForgottController: FormsController {
       }
     }
     else if !id.isValidEmail() {
-      print("no mail");  ui.blocked = false;  return;
       ui.idInput.bottomMessage = Localized("error_invalid_email_or_abo_id")
       Toast.show(Localized("register_validation_issue"))
       ui.blocked = false
     }
     else{
-      print("valid mail");  ui.blocked = false;  return;
       self.mutatePasswordReset(id)
     }
   }
