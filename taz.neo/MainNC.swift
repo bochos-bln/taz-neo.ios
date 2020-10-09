@@ -156,9 +156,9 @@ class MainNC: NavigationController, IssueVCdelegate, UIStyleChangeDelegate,
     isErrorReporting = true
     
     FeedbackComposer.requestFeedback( logData: fileLogger.data, gqlFeeder: self._gqlFeeder) { didSend in
-         print("Feedback send? \(didSend)")
+      print("Feedback send? \(didSend)")
       self.isErrorReporting = false
-       }
+    }
   }
   
   func reportFatalError(err: Log.Message) {
