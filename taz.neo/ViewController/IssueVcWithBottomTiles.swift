@@ -118,6 +118,18 @@ public class IssueVcWithBottomTiles : UICollectionViewControllerWithTabbar{
     fatalError("init(coder:) has not been implemented")
   }
   
+  public override func viewDidAppear(_ animated: Bool) {
+    super.viewDidAppear(animated)
+    onMainAfter {   [weak self] in
+      self?.showTip()
+    }
+  }
+
+  func showTip(){
+    WaitingAppOverlay.showLottie()
+  }
+
+  
   public override func viewDidLoad() {
     super.viewDidLoad()
     if initialized { return }

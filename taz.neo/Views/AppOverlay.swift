@@ -8,6 +8,7 @@
 
 import UIKit
 import NorthLib
+import Lottie
 
 /// WaitingAppOverlay with static call and dismiss by notification
 public class WaitingAppOverlay {
@@ -87,4 +88,45 @@ public class WaitingAppOverlay {
       }
     }
   }
+  
+  public static func showLottie() {
+    let appDelegate = UIApplication.shared.delegate
+    let window = appDelegate?.window
+    if window == nil { return }
+    
+    ///show layer
+    onMain {
+      let layer = UIView(frame: UIScreen.main.bounds)
+      
+      let animation = Animation.named("PDF-Ansciht", subdirectory: "lotties")
+      let animationView = AnimationView()
+      animationView.animation = animation
+      animationView.contentMode = .scaleAspectFit
+      layer.addSubview(animationView)
+      pin(animationView, to: layer)
+      animationView.play(fromProgress: 0,
+                         toProgress: 1,
+                         loopMode: LottieLoopMode.repeat(3),
+                         completion: { (finished) in
+                          if finished {
+                            print("Animation Complete")
+                          } else {
+                            print("Animation cancelled")
+                          }
+                         })
+      window!?.addSubview(layer)
+      UIView.animate(withDuration: 0.7,
+                     delay: 0,
+                     options: UIView.AnimationOptions.curveEaseInOut,
+                     animations: {
+                      layer.alpha = 1.0
+                     }, completion: { (_) in
+                      if layer.isTopmost == false {
+                        window!?.bringSubviewToFront(layer)
+                      }
+                     })
+    }
+  }
+
+  
 }

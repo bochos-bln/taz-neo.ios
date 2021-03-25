@@ -443,13 +443,13 @@ open class TazPdfPagesViewController : PdfPagesCollectionVC, ArticleVCdelegate{
       ziv.scrollView.scrollRectToVisible(CGRect(x: 0, y: 0, width: 1, height: 1), animated: false)
     }
   }
-  
-  public override func handleRenderFinished(_ success:Bool, _ ziv:ZoomedImageView){
-    if success == false { return }
-    onMain { [weak self] in
-      self?.applyPageLayout(ziv)
-    }
-  }
+//  
+//  public override func handleRenderFinished(_ success:Bool, _ ziv:ZoomedImageView){
+//    if success == false { return }
+//    onMain { [weak self] in
+//      self?.applyPageLayout(ziv)
+//    }
+//  }
   
   // MARK: - viewDidDisappear
   override public func viewDidDisappear(_ animated: Bool) {
